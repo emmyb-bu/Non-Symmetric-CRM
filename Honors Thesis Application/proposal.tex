@@ -1,0 +1,139 @@
+%++++++++++++++++++++++++++++++++++++++++
+% Don't modify this section unless you know what you're doing!
+\documentclass[letterpaper,12pt]{article}
+\usepackage{tabularx} % extra features for tabular environment
+\usepackage{amsmath}  % improve math presentation
+\usepackage{graphicx} % takes care of graphic including machinery
+\usepackage[margin=1in,letterpaper]{geometry} % decreases margins
+\usepackage{cite} % takes care of citations
+\usepackage[final]{hyperref} % adds hyper links inside the generated pdf file
+\hypersetup{
+	colorlinks=true,       % false: boxed links; true: colored links
+	linkcolor=blue,        % color of internal links
+	citecolor=blue,        % color of links to bibliography
+	filecolor=magenta,     % color of file links
+	urlcolor=blue         
+}
+%++++++++++++++++++++++++++++++++++++++++
+
+
+\begin{document}
+
+\title{Honors Thesis Proposal: Statistical Properties of a Non-Symmetric Consumer-Resource Model for High-Dimensional Ecosystems}
+\author{
+Emmy Blumenthal\\
+Factuly advisor: Dr. Pankaj Metha
+}
+\date{\today}
+\maketitle
+
+
+
+\section*{Description of Proposed Work}
+
+Theoretical ecologists often seek to understand how large, complex ecosystems assemble and function. 
+Consumer-resource models (CRMs) provide a context to study the interactions between ecosystems and environments by coupling models for resource abundances to the dynamics of species' populations.
+% Theoretical ecologists often seek to understand how an environment influences an ecosystem.
+% % These models are powerful because they quantitatively predict several qualitative phenomena and principles that have been observed in real-world ecosystems.
+% % Additionally, one can formulate many CRMs from several perspectives: as algebraic varieties, as convex optimization programs, and as coupled differential equations.
+By modelling large numbers of species and resources with randomly-determined parameters, CRMs can be investigated using methods from statistical mechanics, specifically methods used for spin glasses, in order to further understand behaviors and phenomena in complex, high-dimensional ecosystems.
+
+In my time working with Dr. Mehta, I have worked extensively wth a particular CRM called the MacArthur Consumer-Resource Model (MCRM) which describes symmetric relations between consumers and resources.
+While exploring the model in several contexts, I have developed and formalized a novel geometric interpretation for the MCRM which extends easily to several other CRMs.
+As a continuation of this work, I have begun working with a non-symmetric extension of the MCRM which is described by the following system of differential equations:
+\begin{align}
+    \frac{dN_i}{dt}
+    &=
+    N_i
+    \left(
+    \sum_{\alpha = 1}^M
+    c_{i\alpha} R_\alpha - m_i
+    \right)
+    \\
+    \frac{dR_\alpha}{dt}
+    &=
+    R_\alpha(K_\alpha - R_\alpha)
+    -
+    \sum_{i=1}^S
+    N_i e_{i\alpha} R_\alpha,
+\end{align}
+where $N_i$ is the population of species $i \in \{1,2,\dots,S\}$, $R_\alpha$ is the abundance of resource $\alpha \in \{1,2,\dots,M\}$, $c_{i\alpha}$ is the relative rate at which species $i$ grows when consuming resource $\alpha$, $e_{i\alpha}$ is the relative rate at which resource $\alpha$ is depleted when being consumed by species $i$, $m_i$ is the mortality rate of species $i$ in isolation, and $K_\alpha$ is the carrying-capacity of resource $\alpha$ in isolation.
+In MacArthur's original Consumer-Resource Model, $c_{i\alpha} = e_{i\alpha}$.
+
+In preliminary numerical experiments and theory calculations, I have found that when the sampling distributions of the parameters $c_{i\alpha}$ and $e_{i\alpha}$ are strongly correlated, a typical ecosystem has a stable fixed point, but as the correlation becomes weaker, a typical ecosystem becomes unstable and exhibits chaotic behavior.
+In my honors thesis, I will analyze the typical behavior of this model and describe the nature of the transition between a stable and unstable phase by applying concepts and methods from statistical mechanics, including replica symmetry and quenched disorder.
+To conduct this research, I will adapt existing theoretical techniques and develop any necessary methods to analyze the statistical properties of this non-symmetric CRM.
+I will compare my theoretical results with computer simulations to assess the accuracy and correctness of theoretical predictions.
+This work will further theoretical ecologists' understanding of complex high-dimensional ecosystems, build intuition for what factors lead to ecological stability, further the application of physical techniques in ecological problems, and develop new tools to assess statistical properties of systems of differential equations with randomly-determined parameters.
+\newpage
+
+\section*{Relevant Work}
+
+\begin{itemize}
+    \item 
+    {Guy Bunin.}
+    ``Ecological communities with Lotka-Volterra dynamics.''
+    (\url{https://journals.aps.org/pre/abstract/10.1103/PhysRevE.95.042414})
+    \item 
+    {Madhu Advani, Guy Bunin, and Pankaj Mehta.}
+    ``Statistical physics of community ecology: a cavity solution to  MacArthur’s consumer resource model.''
+    (\url{https://iopscience.iop.org/article/10.1088/1742-5468/aab04e/meta})
+    \item {Robert Marsland III, Wenping Cui, and Pankaj Mehta.} ``The Minimum Environmental Perturbation Principle: A New Perspective on Niche Theory.''
+    (\url{https://www.journals.uchicago.edu/doi/full/10.1086/710093})
+    \item
+    {Pankaj Mehta, Wenping Cui, Ching-Hao Wang, and Robert Marsland, III.}
+    ``Constrained optimization as ecological dynamics with applications to random quadratic programming in high dimensions.''
+    (\url{https://journals.aps.org/pre/abstract/10.1103/PhysRevE.99.052111})
+    \item {Charles K. Fisher and Pankaj Mehta.} ``The transition between the niche and neutral regimes in ecology.'' (\url{https://doi.org/10.1073/pnas.1405637111})
+    \item {R. H. MacArthur and E. O. Wilson.} 
+    {\em Theory of Island Biogeography}. (\url{https://doi.org/10.1515/9781400881376}).
+    \item {M. Mezard, G. Parisi, and M. Virasoro.} {\em Spin Glass Theory and Beyond: An Introduction to the Replica Method and Its Applications}
+    (\url{https://doi.org/10.1142/0271})
+    \item {Hidetoshi Nishimori.} {\em Statistical Physics of Spin Glasses and Information Processing: An Introduction.}
+    (\url{https://doi.org/10.1093/acprof:oso/9780198509417.001.0001})
+\end{itemize}
+\newpage
+
+\section*{Relevance to Academic and Career Goals}
+
+Throughout my undergraduate education at Boston University, I have furthered my appreciation for physics as a subject matter and have developed an interest in statistical physics and computational approaches.
+Performing this honors thesis project will provide a structured opportunity to research and present an interesting problem that requires an understanding of these subjects.
+Upon graduating with a Bachelor's degree in physics and mathematics, I will seek a research position in industry or at another physics department and subsequently apply to attend a physics PhD program the following year.
+The structure of the honors thesis will help prepare me for graduate school and any future research-based career path I may pursue by providing a context to develop research skills and documentation of the accomplished work.
+Beyond the role the thesis may play in my career goals, it will hopefully be intellectually fulfilling because I will have the opportunity to receive feedback on longer-form work and present research to a committee of faculty members.
+These are formal experiences I have not had, and I believe that engaging in research with this structure will be part of a meaningful conclusion of my undergraduate education.
+
+% In my honors thesis, I propose that I investigate the nature of this transition and its implications on consumer-resource models using computational simulations of the model and theoretical techniques.
+% The thesis will develop a comprehensive understanding of this model, its statistical properties, and its physical predictions.
+
+% The model's phase depends on the level of asymmetry between resource and species interactions.
+
+
+% \section{Introduction}
+
+%++++++++++++++++++++++++++++++++++++++++
+% References section will be created automatically 
+% with inclusion of "thebibliography" environment
+% as it shown below. See text starting with line
+% \begin{thebibliography}{99}
+% Note: with this approach it is YOUR responsibility to put them in order
+% of appearance.
+
+% \begin{thebibliography}{99}
+
+% \bibitem{melissinos}
+% A.~C. Melissinos and J. Napolitano, \textit{Experiments in Modern Physics},
+% (Academic Press, New York, 2003).
+
+% \bibitem{Cyr}
+% N.\ Cyr, M.\ T$\hat{e}$tu, and M.\ Breton,
+% % "All-optical microwave frequency standard: a proposal,"
+% IEEE Trans.\ Instrum.\ Meas.\ \textbf{42}, 640 (1993).
+
+% \bibitem{Wiki} \emph{Expected value},  available at
+% \texttt{http://en.wikipedia.org/wiki/Expected\_value}.
+
+% \end{thebibliography}
+
+
+\end{document}

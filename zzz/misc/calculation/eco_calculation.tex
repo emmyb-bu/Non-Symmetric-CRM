@@ -1,0 +1,1031 @@
+\documentclass[10pt]{article}
+% \usepackage{geometry}
+% \geometry{margin=0.2in}
+\usepackage[utf8]{inputenc}
+
+\nonstopmode
+% \usepackage{minted}[cache=false]
+\usepackage{graphicx} % Required for including pictures
+\usepackage[figurename=Figure]{caption}
+\usepackage{float}    % For tables and other floats
+\usepackage{amsmath}  % For math
+\usepackage{amssymb}  % For more math
+\usepackage{fullpage} % Set margins and place page numbers at bottom center
+\usepackage{paralist} % paragraph spacing
+\usepackage{subfig}   % For subfigures
+%\usepackage{physics}  % for simplified dv, and 
+\usepackage{enumitem} % useful for itemization
+\usepackage{siunitx}  % standardization of si units
+\usepackage{hyperref}
+\usepackage{mmacells}
+\usepackage{listings}
+\usepackage{svg}
+\usepackage{xcolor, soul}
+\usepackage{bm}
+\usepackage{minted}
+% \usepackage{setspace}
+% \usepackage{listings}
+% \usepackage{listings}
+% \usepackage[autoload=true]{jlcode}
+% \usepackage{pygmentize}
+
+\definecolor{cambridgeblue}{rgb}{0.64, 0.76, 0.68}
+
+\sethlcolor{cambridgeblue}
+
+\usepackage[margin=1.8cm]{geometry}
+\newcommand{\C}{\mathbb C}
+\newcommand{\D}{\bm D}
+\newcommand{\R}{\mathbb R}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\N}{\mathbb N}
+\newcommand{\PP}{\mathbb P}
+\newcommand{\A}{\mathbb A}
+\newcommand{\F}{\mathbb F}
+\newcommand{\1}{\mathbf 1}
+\newcommand{\ip}[1]{\left< #1 \right>}
+\newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+
+\def\Tr{{\rm Tr}}
+\def\tr{{\rm tr}}
+\def\Var{{\rm Var}}
+\def\calA{{\mathcal A}}
+\def\calB{{\mathcal B}}
+\def\calD{{\mathcal D}}
+\def\calE{{\mathcal E}}
+\def\calG{{\mathcal G}}
+\def\from{{:}}
+\def\lspan{{\rm span}}
+\def\lrank{{\rm rank}}
+\def\bd{{\rm bd}}
+\def\acc{{\rm acc}}
+\def\cl{{\rm cl}}
+\def\sint{{\rm int}}
+\def\ext{{\rm ext}}
+\def\lnullity{{\rm nullity}}
+\DeclareSIUnit\clight{\text{\ensuremath{c}}}
+\DeclareSIUnit\fm{\femto\m}
+\DeclareSIUnit\hplanck{\text{\ensuremath{h}}}
+
+
+% \lstdefinelanguage{julia}%
+%   {morekeywords={abstract,break,case,catch,const,continue,do,else,elseif,%
+%       end,export,false,for,function,immutable,import,importall,if,in,%
+%       macro,module,otherwise,quote,return,switch,true,try,type,typealias,%
+%       using,while},%
+%    sensitive=true,%
+% %    alsoother={$},%
+%    morecomment=[l]\#,%
+%    morecomment=[n]{\#=}{=\#},%
+%    morestring=[s]{"}{"},%
+%    morestring=[m]{'}{'},%
+% }[keywords,comments,strings]%
+
+% \lstset{%
+%     language         = Julia,
+%     basicstyle       = \ttfamily,
+%     keywordstyle     = \bfseries\color{blue},
+%     stringstyle      = \color{magenta},
+%     commentstyle     = \color{ForestGreen},
+%     showstringspaces = false,
+% }
+
+% $
+\begin{document}
+\begin{center}
+	\hrule
+	\vspace{.4cm}
+	{\textbf { \large Ecology calculation thing}}
+\end{center}
+{\textbf{Name:}\ Emmy Blumenthal \hspace{\fill} \hspace{\fill} \  \\
+\textbf{Due Date:}\  Nov, 2022   \hspace{\fill} \textbf{Email:}\ emmyb320@bu.edu \ 
+\vspace{.4cm}
+\hrule
+
+\section{Setup}
+
+Here we consider the following consumer-resource model:
+\begin{align}
+	\frac{d\lambda_i}{dt}
+	&=
+	\lambda_i 
+	\left(
+		\sum_{\alpha = 1}^M 
+		c_{i\alpha} R_\alpha - m_i
+	\right),
+	\\
+	\frac{dR_\alpha}{t}
+	&=
+	R_\alpha \left(
+		K_\alpha - R_\alpha
+	\right)
+	-\sum_{j=1}^S \lambda_j e_{j\alpha} R_\alpha.
+\end{align}
+The model parameters will follow a normal distribution (i.e., we ignore all unnecessary cumulants).
+The entries of the consumption matrix will have a mean $\mu_c/M$ and fluctuations $d_{i\alpha}$ according to,
+\begin{align}
+	c_{i\alpha}
+	&=
+	\frac{\mu_c}{M} + \sigma_c d_{i\alpha},
+	\\
+	\ip{d_{i\alpha}} &= 0
+	\\
+	\ip{d_{i\alpha} d_{j\beta}}
+	&=
+	\frac{\delta_{ij} \delta_{\alpha \beta}}{M},
+	\label{dVarCond}
+\end{align}
+and the impact matrix $e_{i\alpha}$ will be a mixture distribution of that of $c_{i\alpha}$ and that of another random matrix $X_{i\alpha}$ with normally-distributed entries so that,
+\begin{align}
+	e_{i\alpha}
+	&=
+	a c_{i\alpha}
+	+
+	b X_{i\alpha},
+	\\
+	X_{i\alpha}
+	&=
+	\frac{\mu_X}{M}
+	+
+	\sigma_X f_{i\alpha},
+	\\
+	\ip{f_{i\alpha}}
+	&=
+	0,\\
+	\ip{f_{i\alpha} f_{j\beta}}
+	&=
+	\frac{\delta_{ij} \delta_{\alpha \beta}}{M},
+	\label{fVarCond}
+\end{align}
+where $0 \leq a \leq 1$ is a mixture parameter.
+We assume that the variables $f_{i\alpha}$ and $d_{i\alpha}$ are un-correlated.
+The other parameters will additionally be drawn from a normal distribution according to,
+\begin{align}
+	\ip{K_\alpha}
+	&=
+	K,
+	\\
+	\delta K_\alpha &= K_\alpha - K
+	\\
+	\ip{\delta K_\alpha \delta K_\beta}
+	% \mathrm{Cov} (K_\alpha, K_\beta)
+	&=
+	\delta_{\alpha \beta} \sigma_K^2,
+	\\
+	\ip{m_i} &= m,
+	\\
+	\delta m_i &= m_i - m,
+	\\
+	\ip{\delta m_i\delta m_j}
+	&=
+	\delta_{ij} \sigma^2_{m}.
+\end{align}
+We can additionally introduce,
+\begin{align}
+	\ip{R}
+	=
+	\frac{1}{M}\sum_{\alpha = 1}^M R_\alpha,\\
+	\ip{\lambda}
+	=
+	\frac{1}{S} \sum_{i = 1}^S \lambda_i.
+\end{align}
+With these substitutions, the consumer-resource model becomes,
+\begin{align}
+	\frac{d\lambda_i}{dt}
+	&=
+	\lambda_i 
+	\left(
+		% \sum_{\alpha = 1}^M \frac{\mu_c}{M}R_\alpha 
+		% \mu_c \ip{R}- m
+		g
+		+
+		\sigma_c \sum_{\alpha = 1}^M  d_{i\alpha} R_\alpha 
+		- \delta m_i
+	\right),
+	\\
+	\frac{dR_\alpha}{dt}
+	&=
+	R_\alpha
+	\left(
+		K^\text{eff}
+		- R_\alpha
+		-
+		\sum_{j=1}^S
+		\lambda_j 
+		(
+		a \sigma_c d_{j\alpha} 
+		+
+		b  \sigma_X f_{j\alpha}
+		)
+		+ \delta K_\alpha 
+	\right),
+\end{align}
+where,
+\begin{align}
+	g &= \mu_c \ip{R}- m,\\
+	K^\text{eff} &=K 
+	-
+	\gamma^{-1}
+	\ip{\lambda}
+	\left[
+		a \mu_c + b \mu_X
+	\right],
+\end{align}
+where $\gamma = M/S$.
+If one additional species $i=0$ and resource $\alpha = 0$ is introduced into the ecosystem, the consumer-resource model for species $i=1,\dots,S$ and resources $\alpha = 1,\dots,M$ become,
+\begin{align}
+	\frac{d\lambda_i}{dt}
+	&=\label{MCRMEqspeciesOld}
+	\lambda_i 
+	\left(
+		\mu_c \ip{R} - \left[
+			m-\sigma_c d_{i0} R_0
+			\right]
+		+
+		\sigma_c \sum_{\alpha = 1}^M  d_{i\alpha} R_\alpha 
+		- \delta m_i
+	\right),
+	\\
+	\frac{dR_\alpha}{dt}
+	&=
+	R_\alpha
+	\left(
+		\left[
+			K - \lambda_0
+			(
+			a \sigma_c d_{0\alpha} 
+			+
+			b \sigma_X f_{0\alpha}
+			)
+		\right]
+		-\gamma^{-1} \ip{\lambda} \left[a\mu_c + b \mu_X\right]
+		- R_\alpha
+		-
+		\sum_{j=1}^S
+		\lambda_j 
+		(
+		a \sigma_c d_{j\alpha} 
+		+
+		b  \sigma_X f_{j\alpha}
+		)
+		+ \delta K_\alpha \label{perturbedOldResourcesMCRMEQ}
+	\right),
+\end{align}
+and for species $i=0$ and resource $\alpha = 0$,
+\begin{align}
+	\frac{d\lambda_0}{dt}
+	&=
+	\lambda_0
+	\left(
+		g
+		+
+		\sigma_c \sum_{\alpha = 1}^M  d_{0\alpha} R_\alpha 
+		+
+		\sigma_c d_{00} R_0
+		- \delta m_0
+	\right),
+	\\
+	\frac{dR_0}{dt}
+	&=
+	R_0
+	\left(
+		K^\text{eff}
+		- R_0
+		-
+		\sum_{j=1}^S
+		\lambda_j 
+		(
+		a \sigma_c d_{j0} 
+		+
+		b \sigma_X f_{j0}
+		)
+		+
+		\lambda_0
+		(
+		a \sigma_c d_{00} 
+		+
+		b  \sigma_X f_{00}
+		)
+		+ \delta K_0
+	\right).
+\end{align}
+
+\section{Self-consistency and the cavity method}
+We define the following susceptibilities:
+\begin{align}
+	\chi_{i\beta}^{(\lambda)}
+	&=
+	\frac{\partial\overline{\lambda}_i}{\partial K_\beta},
+	\\
+	\chi_{\alpha\beta}^{(R)}
+	&=
+	\frac{\partial\overline{R}_\alpha}{\partial K_\beta},
+	\\
+	\nu_{ij}^{(\lambda)}
+	&=
+	\frac{\partial\overline{\lambda}_i}{\partial m_j},
+	\\
+	\nu_{\alpha j}^{(R)}
+	&=
+	\frac{\partial\overline{R}_\alpha}{\partial m_j},
+\end{align}
+where a variable with an line on top represents the steady-state value.
+When we add a resource and species to the system, the abundances and populations of all other resources and species will be perturbed; we estimate this perturbation to first order as $M$ and $S$ are assumed to be very large.
+When estimating this perturbation, we must add an additional species and an additional resource in order to account for how the effect of perturbing species populations has feedback through resource abundances and vice-versa.
+The terms that are added to the consumer-resource model (see eqs. \ref{perturbedOldSpeciesMCRMEQ}, \ref{perturbedOldResourcesMCRMEQ}) by introducing these species may be treated as perturbations to $m_i$ and $K_\alpha$, so we approximate the perturbed system's response relative to the unperturbed system linearly:
+\begin{align}
+	\overline{\lambda}_i 
+	&= \overline{\lambda}_{i \setminus 0}
+	-
+	\sum_{\beta = 1}^M \chi_{i \beta}^{(\lambda)} (a \sigma_c d_{0\beta} + b \sigma_X f_{0 \beta}) \overline{\lambda}_0
+	- \sigma_c \sum_{j=1}^S \nu_{ij}^{(\lambda)}
+	d_{j0} \overline{R}_0\\
+	\overline{R}_\alpha
+	&=
+	\overline{R}_{\alpha\setminus 0}
+	-
+	\sum_{\beta = 1}^M
+	\chi_{\alpha\beta}^{(R)}(a \sigma_c d_{0\beta} + b \sigma_X f_{0 \beta}) \overline{\lambda}_0
+	-
+	\sigma_c \sum_{j=1}^S \nu_{\alpha j}^{(R)} d_{j0} \overline{R}_0
+\end{align}
+Substituting this linear approximation into the MCRM steady-state equation for the new species' population (eq. \ref{perturbedOldResourcesMCRMEQ}), we have,
+\begin{align}
+	0
+	=
+	\overline{
+		\lambda
+	}_0
+	\left[
+		g
+		+
+		\sigma_c \sum_{\alpha = 1}^M  d_{0\alpha} 
+		\overline{R}_{\alpha \setminus 0}	
+		-
+		\sigma_c \sum_{\alpha,\beta = 1}^M  d_{0\alpha} \chi_{\alpha\beta}^{(R)}
+		\left(
+			a \sigma_c d_{0\beta} + b \sigma_X f_{0\beta}
+		\right)\overline{\lambda}_0
+		-
+		\sigma_c^2
+		\sum_{\alpha = 1}^M
+		\sum_{j = 1}^S
+		d_{0\alpha} \nu_{\alpha j}^{(R)}
+		d_{j0} \overline{R}_0
+	% R_\alpha 
+		+\sigma_c d_{00}\overline{R}_0
+		- \delta m_0
+	\right].\label{firstSelfConsistency}
+\end{align}
+Using our assumptions from line \ref{dVarCond} and \ref{fVarCond},
+\begin{align}
+	&\ip{\sum_{\alpha,\beta=1}^M d_{0\alpha} \chi_{\alpha\beta}^{(R)}\left(a \sigma_c d_{0\beta} + b \sigma_X f_{0\beta}\right)}\
+	=\nonumber
+	\sum_{\alpha,\beta=1}^M
+	\ip{\chi_{\alpha\beta}^{(R)}}
+	\left(
+		a \sigma_c \ip{d_{0\alpha} d_{0\beta}} + b \sigma_X \ip{d_{0\alpha} f_{0 \beta}}
+	\right)\\
+	&\quad=
+	\sum_{\alpha,\beta=1}^M
+	\ip{\chi_{\alpha\beta}^{(R)}}
+	\left(
+		a \sigma_c \delta_{\alpha\beta}M^{-1} + b \sigma_X \times 0 
+	\right)
+	=
+	a \sigma_c M^{-1} \sum_{\alpha =1}^M
+	\ip{\chi_{\alpha\alpha}^{(R)}}
+	=
+	a \sigma_c \chi,
+\end{align}
+where we have defined $\chi = \ip{\chi_{\alpha\alpha}^{(R)}}$ and used $\ip{d_{0\alpha}f_{0\beta}} = 0$ (i.e., $X$ and $c$ are uncorrelated).
+Additionally, the variances of the second and third sums (the ones involving $\chi_{\alpha\beta}^{(R)}$ and $\nu_{\alpha j}^{(R)}$) are of order $1/M$ which can be seen by expanding the second moments.
+Using these observations, we can re-write \ref{firstSelfConsistency} as,
+\begin{align}
+	0 = \overline{\lambda}_0 \left(
+		g - a \sigma_c^2 \chi \overline{\lambda}_0 + \sigma_c \sum_{\alpha =1}^M d_{0\alpha} \overline{R}_{\alpha \setminus 0} - \delta m_0
+	\right)
+	+
+	O(M^{-1/2}).
+\end{align}
+This result matches line (39) of the reference because we are varying the impact vectors $e_{j\alpha}$ with $X$, not the consumption matrix $c_{i\alpha}$, and this is the result for perturbed resources.
+The last two terms in the above line are a sum of a large number of un-correlated random variables, and $\delta m_i$ are normally-distributed, so we can model the terms as a normal random variable with zero mean (see the original CRM species equation) with variance,
+\begin{align}
+	\sigma_g^2
+	=
+	\Var\left[
+		\sigma_c 
+		\sum_{\alpha =1}^M d_{0\alpha} \overline{R}_{\alpha\setminus 0}
+		-
+		\delta m_0
+	\right]
+	=
+	\Var
+	\left[
+		\sigma_c \sum_{\alpha = 1}^M d_{0\alpha} \overline{R}_{\alpha\setminus0}
+	\right]
+	+
+	\Var\left[
+		\delta m_0
+	\right]
+	=
+	\sigma_c^2 
+	\sum_{\alpha = 1}^M 
+	\overline{R}_{\alpha\setminus 0}^2
+	\Var[d_{0\alpha}]
+	+
+	\sigma_m^2
+	=
+	\sigma_c^2 q_R +\sigma_m^2,
+\end{align}
+where,
+\begin{align}
+	q_R
+	=
+	\frac{1}{M}
+	\sum_{\alpha=1}^M
+	\overline{R}_{\alpha\setminus 0}^2.
+\end{align}
+Taking $Z_\lambda$ to be the unit normal random variable, the self-consistency equation becomes,
+\begin{align}
+	0 = \overline{\lambda}_0 
+	\left(
+		g - a \sigma_c^2 \chi \overline \lambda_0 + \sigma_g Z_\lambda
+	\right).
+\end{align}
+The roots of this quadratic equation are $\overline{\lambda}_0 = 0$ and $\overline{\lambda}_0 = (g + \sigma_g Z)/(a \sigma_c^2 \chi)$.
+We demand that the species' populations be non-negative and be non-zero when possible for physically sensible results;
+Therefore, $\overline{\lambda}_0$ is modeled by a truncated normal distribution:
+\begin{align}
+	\overline{\lambda}_0
+	=
+	\max
+	\left\{
+	0,
+	\frac{g + \sigma_g Z_\lambda}{a \sigma_c^2 \chi}
+	\right\}.
+	\label{newSpeciesFinal}
+\end{align}
+We now will repeat these calculations for the effects on the new resource.
+Using the steady-state equation for the new resource and estimating the effects of adding the new species and resource as a linear perturbation to $m_i$ and $K_\alpha$,
+we have,
+\begin{align}
+	0
+	=
+	\nonumber
+	\overline{R}_0
+	&
+	\left(
+		K^\text{eff}
+		- \overline{R}_0
+		-
+			\sum_{i=1}^S
+			\overline{\lambda}_{i \setminus 0}
+			(
+				a \sigma_c d_{i0} 
+				+
+				b \sigma_X f_{i0}
+				)
+	\right.
+	\\
+	\nonumber
+	% \left.
+		&+
+		\sum_{i=1}^S
+		\sum_{\beta = 1}^M
+		\chi_{i \beta}^{(\lambda)}
+		\overline{\lambda}_0
+			(
+				a^2 \sigma_c^2 d_{0\beta} d_{i0} 
+				+
+				a b \sigma_c \sigma_X d_{0\beta} f_{i0}
+				 +
+				a b \sigma_X \sigma_c d_{i0}  f_{0 \beta}
+				+
+				b^2 \sigma_X^2 f_{0 \beta} f_{i0}
+			)
+		% \right.
+		\\
+		&
+		\left.
+			+
+			\sigma_c \sum_{i,j=1}^S
+			% \sum_{j=1}^S 
+			\nu_{ij}^{(\lambda)}
+			 \overline{R}_0
+			(
+				a \sigma_c d_{i0} d_{j0}
+				+
+				b \sigma_X f_{i0}d_{j0}
+			)
+		+
+		\overline{\lambda}_0
+		(
+		a \sigma_c d_{00} 
+		+
+		b  \sigma_X f_{00}
+		)
+		+ \delta K_0
+	\right).
+\end{align} 
+Immediately, we observe that sum involving $\chi_{i\beta}^{(\lambda)}$ has zero mean and variance of order $O(1/M)$ because indices are summed starting at $\beta,i=1$ and the other indices involved are $\beta,i=0$.
+Similarly, we see that the variance of the term involving $\nu_{ij}$ is of order $O(1/M)$.
+We will ignore these terms compared to the order-1 terms.
+Using the assumptions that $d$ and $f$ are uncorrelated:
+\begin{gather}
+	\ip{
+	\sum_{i,j = 1}^S
+	\nu_{ij}^{(\lambda)}
+	(a\sigma_c d_{i0}d_{j0} + b \sigma_X f_{i0} d_{j0})
+	}
+	% &
+	=
+	% \nonumber
+	\sum_{i,j=1}^S
+	\ip{\nu_{ij}^{(\lambda)}}
+	(
+		a\sigma_c \ip{d_{i0}d_{j0}}
+		+
+		b\sigma_X \ip{f_{i0}} \ip{d_{j0}}
+	)
+	\\
+	% &
+	=
+	\sum_{i,j=1}^S
+	\ip{\nu_{ij}^{(\lambda)}}
+	(a \sigma_c M^{-1}\delta_{ij} + 0 )
+	=
+	\gamma^{-1} a \sigma_c \nu,
+\end{gather}
+where $\nu = \ip{\nu_{jj}^{(\lambda)}}$.
+Keeping only leading order terms,
+\begin{align}
+	0
+	=
+	\overline{R}_0
+	\left(
+		K^\text{eff}
+		-
+		\overline{R}_0
+		+
+		\delta K_0
+		-
+		\sum_{i=1}^S
+		\overline{\lambda}_{i \setminus 0}
+		(
+			a\sigma_c d_{i0} + b\sigma_X f_{i0}
+		)
+		+
+		a \sigma_c^2 \gamma^{-1} \nu \overline{R}_0
+	\right).
+\end{align}
+We model $\delta K_0 -  \sum_{i=1}^S (a \sigma_c d_{i0} + b \sigma_X f_{i0})\lambda_{i\setminus 0}$ as a normal random variable that has zero mean and variance,
+\begin{align}
+	\sigma_{K^{\text{eff}}}^2
+	&=\nonumber
+	\Var\left(
+		\delta K_0 - \sigma_c \sum_{i=1}^S (a \sigma_c d_{i0} + b \sigma_X f_{i0})\lambda_{i\setminus 0}
+	\right)
+	=
+	\Var\left(\delta K_0\right)
+	+
+	\sum_{i=1}^S\Var((a \sigma_c d_{i0} + b \sigma_X f_{i0})\overline{\lambda}_{i\setminus 0})
+	\\
+	&=
+	\sigma_K^2
+	+
+	\sum_{i=1}^S \overline{\lambda}_{i\setminus 0}^2(
+	a^2 \sigma_c^2 
+	M^{-1}
+	+
+	b^2 \sigma_X^2
+	M^{-1}
+	)
+	=
+	\sigma_K^2 + (a^2 \sigma_c^2 + b^2 \sigma_X^2) \gamma^{-1} q_\lambda,
+\end{align}
+where,
+\begin{align}
+	q_\lambda
+	=
+	\frac{1}{S}
+	\sum_{j = 1}^S \overline{\lambda}_{j\setminus 0}^2.
+\end{align}
+This makes the approximation of the steady-state condition for the added species,
+\begin{align}
+	0 =\overline{R}_0 
+	(
+		K^\text{eff} - \overline{R}_0 + \sigma_{K^\text{eff}} Z_R
+		+
+		a \sigma_c^2 \gamma^{-1} \nu \overline{R}_0
+	).
+\end{align}
+Solving for $\overline{R}_0$ and demanding that the resources be non-negative and physically meaningful:
+\begin{align}
+	\overline{R}_0
+	=
+	\frac{\max\{0,K^\text{eff} + \sigma_{K^\text{eff}} Z_R\}}{1 - a \sigma_c^2 \gamma^{-1} \nu }.
+	\label{newResourceFinal}
+\end{align}
+Some quantities of interest are the fractions of non-zero species and resources:
+\begin{align}
+	\phi_R
+	=
+	\ip{
+		\Theta(\overline{R}_0)
+	}
+	,
+	\qquad
+	\phi_\lambda
+	=
+	\ip{
+		\Theta(\overline{\lambda}_0)
+	}.
+\end{align}
+Observe that (using $\partial_K K^\text{eff} = 1$),
+\begin{align}
+	\frac{\partial \overline{R}_0}{\partial K}
+	=
+	\frac{\partial}{\partial K}
+	\left[
+	\frac{K^\text{eff} + \sigma_{K^\text{eff}} Z_R }{1-a\sigma_c^2 \gamma^{-1} \nu}\Theta(K^\text{eff} + \sigma_{K^\text{eff}} Z_R)\right]
+	=
+	\frac{\Theta(K^\text{eff} + \sigma_{K^\text{eff}} Z_R) }{1-a\sigma_c^2 \gamma^{-1}\nu}
+	+
+	\text{$\delta$-term}
+	\implies
+	\ip{
+	\frac{\partial \overline{R}_0}{\partial K}
+	}
+	=
+	\frac{\phi_R}{1-a\sigma_c^2 \gamma^{-1}\nu}.
+\end{align}
+Similarly (using $\partial_m g = -1$),
+\begin{align}
+	\frac{\partial \overline{\lambda}_0}{\partial m}
+	=
+	\frac{\partial}{\partial m}
+	\left[
+		\frac{g+\sigma_g Z_\lambda}{a \sigma_c^2 \chi}
+		\Theta(g + \sigma_g Z_\lambda)
+	\right]
+	=
+	-\frac{\Theta(g + \sigma_g Z_\lambda)}{a\sigma_c^2 \chi}
+	+
+	\text{$\delta$-term}
+	\implies
+	\ip{
+	\frac{\partial \overline{\lambda}_0}{\partial m}
+	}
+	=
+	-\frac{\phi_\lambda}{a\sigma_c^2 \chi}
+\end{align}
+From our definitions for $\chi^{(R)}_{\alpha\beta}$ then $\chi  = \ip{\chi_{00}^{(R)}}$ and $\nu^{(\lambda)}_{ij}$ then $\nu = \ip{\nu_{00}^{(\lambda)}}$,
+\begin{align}
+	\chi& = \frac{\phi_R}{1-\gamma^{-1}a\sigma_c^2\nu},
+	\\
+	\nu &= - \frac{\phi_\lambda}{a\sigma_c^2 \chi}.
+\end{align}
+In these computations, we regularly work with normal distributions that are transformed by the Heaviside $\mathrm{ramp}(x) = \max\{0,x\} = x \Theta(x)$ map.
+If $Z$ is a standard normal random variable, the PDF of $\mathrm{ramp}(\sigma Z + \mu)$ is,
+\begin{align}
+	p_{\mathrm{ramp}(\sigma Z + \mu)}(z)
+	=
+	\delta(z) \Phi(-\mu/\sigma)
+	+
+	\frac{1}{\sqrt{2\pi}\sigma} e^{-(z-\mu)^2 / 2\sigma^2}\Theta(z),
+\end{align}
+where $\Phi$ is the standard normal CDF, which makes $j$th ($j\geq 1$) moment,
+\begin{align}
+	W_j(\mu,\sigma)
+	&=
+	\ip{\mathrm{ramp}(\sigma Z + \mu)^j}
+	=
+	0+
+	\frac{1}{\sqrt{2\pi}\sigma}
+	\int_0^\infty 
+	dz
+	z^j
+	e^{-(z-\mu)^2/2\sigma^2}
+	=
+	\sigma^j
+	\int_{-\mu/\sigma}^\infty 
+	\frac{dz}{\sqrt{2\pi}}
+	e^{-z^2/2}
+	( z+\mu/\sigma)^j,
+	\\
+	&=
+	\frac{2^{-3/2}}{\sqrt{\pi}}(\sqrt{2} \sigma)^j
+	\left[j\frac{\mu}{\sigma }  \Gamma \left(\frac{j}{2}\right) \, _1F_1\left(\frac{1-j}{2};\frac{3}{2};-\frac{\mu ^2}{2 \sigma ^2}\right)
+	+
+	\sqrt{2} \Gamma \left(\frac{j+1}{2}\right) \, _1F_1\left(-\frac{j}{2};\frac{1}{2};-\frac{\mu ^2}{2 \sigma ^2}\right)\right],
+\end{align}
+where $\,_1 F_1$ is the confluent hypergeometric function of the first kind.
+Observe that $W_j(\mu/\alpha , \sigma/\alpha) = \alpha^{-j}W_j(\mu,\sigma)$.
+% \footnote{I'm almost certain there's something wrong with line 61 of the reference.
+% Checked it against histograms and {\em Mathematica} code\dots
+% }
+Additionally,
+\begin{align}
+	W_1(x,1)
+	&=
+	\frac{1}{\sqrt{2\pi}} e^{-x^2/2} + x \Phi(x),
+	\\
+	W_2(x,1)
+	&=
+	\frac{1}{\sqrt{2\pi}}x e^{-x^2/2} + (1+x^2) \Phi(x).
+\end{align}
+where $\Phi$ is the standard normal CDF.
+Similarly, for a random variable $\Theta(\sigma Z + \mu)$, the PDF is,
+\begin{align}
+	p_{\Theta(\sigma Z + \mu)} (z)
+	=
+	\frac{1}{2}
+	(
+		1 + \mathrm{erf}\left(
+			\frac{\mu}{\sigma\sqrt{2}}
+		\right)
+	)
+	\delta(z-1)
+	+
+	\frac{1}{2}
+	\mathrm{erfc}\left(
+			\frac{\mu}{\sigma\sqrt{2}}
+		\right)
+	\delta(z),
+\end{align}
+so the $j$th moment ($j \geq 1$) is,
+\begin{align}
+	% w_j(\mu,\sigma)
+	% =
+	\ip{\Theta(\sigma Z + \mu)^j}
+	=
+	0
+	+
+	\frac{1}{2}
+	(
+		1 + \mathrm{erf}\left(
+			\frac{\mu}{\sigma\sqrt{2}}
+		\right)
+	) 1^j
+	=
+	\frac{1}{2}
+	(
+		1 + \mathrm{erf}\left(
+			\frac{\mu}{\sigma\sqrt{2}}
+		\right)
+	)
+	=
+	\Phi(\mu/\sigma).
+\end{align}
+% where $\Phi$ is the standard normal CDF.
+From the definitions of $\phi_\lambda$ and $\phi_R$,
+\begin{align}
+	\phi_R
+	&=
+	\ip{\Theta(K^\text{eff} + \sigma_{K^\text{eff}} Z_R)}
+	=
+	w_1(K^\text{eff},\sigma_{K^\text{eff}})
+	=
+	\Phi(K^\text{eff}/\sigma_{K^\text{eff}})
+	=
+	\Phi(\Delta_{K^\text{eff}}),
+	\\
+	\phi_\lambda
+	&=
+	\ip{\Theta(g + \sigma_g Z_\lambda)}
+	=
+	\Phi(g/\sigma_g)
+	=
+	\Phi(\Delta_g),
+\end{align}
+where $\Delta_g = g/\sigma_g$ and $\Delta_{K^\text{eff}} = K^\text{eff}/\sigma_{K^\text{eff}}$.
+Using equations \ref{newResourceFinal} and \ref{newSpeciesFinal},
+\begin{align}
+	\ip{\lambda}
+	&=
+	\ip{\overline{\lambda}_0}
+	=
+	W_1 (g/a\sigma_c^2 \chi, \sigma_g/a \sigma_c^2 \chi)
+	=
+	\sigma_g(a
+	 \sigma_c^2 \chi)^{-1}
+	W_1(\Delta_g,1)
+	=
+	\frac{\sigma_g}{
+		a \sigma_c^2 \chi
+	}
+	\left[
+	\frac{1}{\sqrt{2\pi}}e^{-\Delta_g^2/2} + \Delta_g \Phi(\Delta_g)\right],\\
+	\ip{R}
+	&=
+	\ip{\overline{R}_0}
+	% =
+	% (1-a \sigma_c^2 \gamma^{-1} \nu)^{-1}W_1(K^\text{eff}, \sigma_{K^\text{eff}})
+	=
+	(1-a \sigma_c^2 \gamma^{-1} \nu)^{-1}\sigma_{K^\text{eff}}W_1(\Delta_{K^\text{eff}},1)
+	=
+	\frac{\sigma_{K^\text{eff}}}{1-a \sigma_c^2 \gamma^{-1} \nu}
+	\left[
+	\frac{1}{\sqrt{2\pi}}e^{-\Delta_{K^\text{eff}}^2/2} + \Delta_{K^\text{eff}}
+	% \phi_R
+	\Phi(\Delta_{K^\text{eff}})
+	\right],
+	\\
+	q_\lambda
+	&
+	=
+	\ip{\overline{\lambda}_0^2}
+	=
+	(a \sigma_c^2  \chi) ^{-2}\sigma_g^2
+	W_2({\Delta_g},1)
+	=
+	\frac{\sigma_g^2}{(a \sigma_c^2  \chi)^2}
+	\left[
+		\frac{1}{\sqrt{2\pi}} \Delta_g e^{-\Delta_g^2/2}
+		+
+		(1+\Delta_g^2)\Phi(\Delta_g)
+	\right]
+	\\
+	q_R
+	&=
+	\ip{\overline{R}_0^2}
+	=
+	(1-a \sigma_c^2 \gamma^{-1} \nu)^{-2}\sigma_{K^\text{eff}}^{2}W_2(\Delta_{K^\text{eff}},1)
+	=
+	\frac{\sigma_{K^\text{eff}}^2}{(1-a \sigma_c^2 \gamma^{-1} \nu)^2}
+		\left[
+			\frac{1}{\sqrt{2\pi}} \Delta_{K^\text{eff}} e^{-\Delta_{K^\text{eff}}^2/2}
+			+
+			(1+\Delta_{K^\text{eff}}^2) \Phi(\Delta_{K^\text{eff}})
+		\right]
+\end{align}
+% Similarly, the $j$th moment ($j \geq 1$) of a random variable $\Theta(\sigma Z + \mu)$ is,
+% \begin{align}
+% 	w_j(\mu,\sigma)
+% 	=
+% 	\ip{\Theta(\sigma Z + \mu)}
+% 	=
+% \end{align}
+
+
+% In these computations, we regularly work with a truncated normal distribution with mean $\Delta$ and variance $\sigma^2$.
+% The $j$th moment of this distribution are,
+% \begin{align}
+% 	w_j(\Delta, \sigma)
+% 	=
+% 	\frac{1}{\sqrt{2\pi}\sigma}
+% 	\int_{0}^\infty dz
+% 	e^{-(z-\Delta)^2/2 \sigma^2} z^j
+% 	=
+% 	\frac{\sigma^j}{\sqrt{2\pi}}
+% 	\int_{-\sigma\Delta}^\infty dz
+% 	e^{-z^2/2} ( z+\Delta/\sigma)^j
+% \end{align}
+
+
+
+
+% \begin{align}
+% 	\Var{\left(
+% 		\sum_{\alpha,\beta=1}^M d_{0\alpha} \chi_{\alpha\beta}^{(R)}\left(a \sigma_c d_{0\beta} + b \sigma_X f_{0\beta}\right)
+% 		\right)}
+% 	=
+% 	\sum_{\alpha,\beta=1}^M
+% 	\Var\left(\chi_{\alpha\beta}^{(R)}\right)
+% 	%  \left(a^2 \sigma_c^2 \ip{d_{0\alpha}d_{0\beta}^2} + 2 a b \sigma_c \sigma_X \ip{d_{0\beta}f_{0\beta}}+b^2 \sigma_X^2 \ip{f_{0\beta}^2}\right)
+% \end{align}
+% \begin{align}
+% 	&\ip{\sum_{\alpha,\beta = 1}^M  d_{0\alpha} \chi_{\alpha\beta}^{(R)}
+% 	\left(
+% 		a \sigma_c d_{0\beta} + b \sigma_X f_{0\beta}
+% 	\right)\overline{\lambda}_0}
+% 	=\nonumber
+% 	\sum_{\alpha, \beta=1}^M
+% 	\chi_{\alpha \beta}^{(R)}\left(a \sigma_c \ip{d_{0\alpha}d_{0\beta}} + b \sigma_X \ip{d_{0\alpha}f_{0\beta}}\right)\overline{\lambda}_0\\
+% 	&\qquad=
+% 	\sum_{\alpha, \beta=1}^M
+% 	\chi_{\alpha \beta}^{(R)}\left(a \sigma_c \delta_{\alpha \beta}M^{-1} + b \sigma_X \ip{d_{0\alpha}}\ip{f_{0\beta}}\right)\overline{\lambda}_0
+% 	=
+% 	a \sigma_c \sum_{\alpha = 1}^M \chi_{\alpha\alpha}^{(R)} M^{-1}
+% 	=
+% 	a\sigma_c \chi M^{-1},
+% \end{align}
+% where,
+% \begin{align}
+% \chi = \frac{1}{M} \sum_{\alpha = 1}^M \
+% \end{align}
+
+
+% \begin{align}
+% 	\ip{c_{i\alpha}}
+% 	=
+% 	\frac{\mu_c}{M}
+% 	\\
+% 	\Cov()
+% \end{align}
+
+
+\section*{A different parameterization}
+
+In Pankaj's calculations, he used the following parameterization for the species-resources interaction matrices:
+\begin{align}
+	c_{i\alpha} &= \frac{\mu_c}{M} + \frac{\sigma_c}{\sqrt{M}} \tilde d_{i\alpha} \\ 
+	e_{i\alpha} &= \frac{\mu_e}{M} + \frac{\sigma_e}{\sqrt{M}}\left(\rho \tilde d_{i\alpha} + \sqrt{1 - \rho^2}\tilde x_{i\alpha}\right),
+\end{align}
+where $\tilde d_{i\alpha}, \tilde x_{i\alpha} \sim N(0,1)$ are standard independent normal random variables.
+This is in contrast to the parameterization we used for the calculations where,
+\begin{align}
+	c_{i\alpha} &= \frac{\mu_c}{M} + \sigma_c d_{i\alpha}\\
+	e_{i\alpha} &= 
+	\frac{a\mu_c}{M} + a \sigma_c d_{i\alpha}
+	+ 
+	b 
+	\left(
+		\frac{\mu_X}{M} + \sigma_X f_{i\alpha}
+	\right),
+\end{align}
+where this time $d_{i\alpha} ,f_{i\alpha}\sim N(0,M^{-1/2})$ are independent normal random variables with variances $1/M$.
+To match results, we take $d_{i\alpha} = \tilde d_{i\alpha} /\sqrt{M}$, $f_{i\alpha} = \tilde x_{i\alpha}/\sqrt{M}$.
+The equations which match the parameters are undetermined, so we choose $b=1$ to find,
+\begin{gather}
+	\mu_c = \mu_c ,\\
+	\sigma_c = \sigma_c,
+	\\
+	b=1
+	\\
+	a=\frac{\sigma_e}{\sigma_c}\rho,
+	\\
+	\mu_X = \mu_e - \frac{\sigma_e}{\sigma_c}\rho\mu_c
+	\\
+	\sigma_X =\sigma_e\sqrt{1-\rho^2}
+\end{gather}
+By substituting these relations into the parameterization initially used in this note,
+\begin{align}
+	% c_{i\alpha} &= \frac{\mu_c}{M} + \sigma_c d_{i\alpha}\\
+	e_{i\alpha} 
+	&= 
+	\frac{\sigma_e\rho\mu_c}{M\sigma_c}
+	+ 
+	\frac{\sigma_e}{\sigma_c}\rho
+	\sigma_c d_{i\alpha}
+	+ 
+	\frac{1}{M} \left(\mu_e - \frac{\sigma_e}{\sigma_c}\rho\mu_c \right)+ 
+	\sigma_e\sqrt{1-\rho^2} f_{i\alpha},
+	\\
+	&= 
+	\frac{\sigma_e\rho\mu_c}{M\sigma_c}
+	+ 
+	\sigma_e\rho
+	 d_{i\alpha}
+	+ 
+	\frac{1}{M}
+	\mu_e 
+	- 
+	\frac{\sigma_e\rho\mu_c}{M\sigma_c}
+	+ 
+	\sigma_e\sqrt{1-\rho^2} f_{i\alpha},
+	=
+	\frac{\mu_e}{M} +
+	\sigma_e\left(
+		\rho d_{i\alpha} + \sqrt{1-\rho^2}f_{i\alpha}
+	\right)
+\end{align}
+% \begin{align}
+% 	e_{i\alpha}
+% 	=
+% 	\rho \frac{\sigma_e\mu}{\sigma_c M}
+% 	+
+% 	\frac{1}{M}
+% 	\sigma_e \sqrt{1-\rho^2} \left(
+% 		\frac{\mu_e}{\sigma_e} - \rho \frac{\mu_c}{\sigma_c}
+% 	\right)\frac{1}{\sqrt{1-\rho^2}}
+% 	+
+% 	\rho \frac{\sigma_e}{\sigma_c}\sigma_c
+% 	d_{i\alpha}
+% 	+
+% 	\sigma_e
+% 	\sqrt{1-\rho^2}x_{i\alpha}
+% 	=
+% 	\frac{\mu_e}{M}
+% 	+
+% 	\sigma_e \left(\rho d_{i\alpha} + \sqrt{1-\rho^2} x_{i\alpha}\right).
+% \end{align}
+% % Additionally,
+% \begin{align}
+% 	a \mu_c = \frac{\rho\sigma_e \mu_c}{\sigma_c}
+% \end{align}
+
+
+
+
+
+
+\end{document}
+
+
+
+
+

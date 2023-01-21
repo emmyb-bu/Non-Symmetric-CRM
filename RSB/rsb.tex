@@ -1,0 +1,3757 @@
+\documentclass[10pt]{article}
+% \usepackage{geometry}
+% \geometry{margin=0.2in}
+\usepackage[utf8]{inputenc}
+
+\nonstopmode
+% \usepackage{minted}[cache=false]
+\usepackage{graphicx} % Required for including pictures
+\usepackage[figurename=Figure]{caption}
+% \usepackage{float}    % For tables and other floats
+\usepackage{amsmath}  % For math
+\usepackage{amssymb}  % For more math
+\usepackage{fullpage} % Set margins and place page numbers at bottom center
+% \usepackage{paralist} % paragraph spacing
+% \usepackage{subfig}   % For subfigures
+%\usepackage{physics}  % for simplified dv, and 
+% \usepackage{enumitem} % useful for itemization
+% \usepackage{siunitx}  % standardization of si units
+\usepackage{hyperref}
+% \usepackage{mmacells}
+% \usepackage{listings}
+% \usepackage{svg}
+\usepackage{xcolor, soul}
+\usepackage{bm}
+% \usepackage{braket}
+% \usepackage{cancel}
+\usepackage{setspace}
+% \usepackage{listings}
+% \usepackage{listings}
+% \usepackage[autoload=true]{jlcode}
+% \usepackage{pygmentize}
+
+\definecolor{hlcol}{rgb}{0.706, 0.882, 0.816}
+
+\sethlcolor{hlcol}
+
+
+\newcommand{\mathcolorbox}[1]{\colorbox{hlcol}{$\displaystyle #1$}}
+% \usepackage[margin=1.8cm]{geometry}
+% \newcommand{\C}{\mathbb C}
+% \newcommand{\D}{\bm D}
+% \newcommand{\R}{\mathbb R}
+% \newcommand{\Q}{\mathbb Q}
+% \newcommand{\Z}{\mathbb Z}
+% \newcommand{\N}{\mathbb N}
+% \newcommand{\PP}{\mathbb P}
+% \newcommand{\A}{\mathbb A}
+% \newcommand{\F}{\mathbb F}
+% \newcommand{\1}{\mathbf 1}
+% \newcommand{\ip}[1]{\left< #1 \right>}
+\newcommand{\eval}[1]{\left\langle #1 \right\rangle}
+\newcommand{\Var}[1]{\mathrm{Var}\left[ #1 \right]}
+% \def\Var{{\rm Var}}
+% \newcommand{\abs}[1]{\left| #1 \right|}
+% \newcommand{\norm}[1]{\left\| #1 \right\|}
+
+% \def\Tr{{\rm Tr}}
+% \def\tr{{\rm tr}}
+% \def\calA{{\mathcal A}}
+% \def\calB{{\mathcal B}}
+% \def\calD{{\mathcal D}}
+% \def\calE{{\mathcal E}}
+% \def\calG{{\mathcal G}}
+% \def\from{{:}}
+% \def\lspan{{\rm span}}
+% \def\lrank{{\rm rank}}
+% \def\bd{{\rm bd}}
+% \def\acc{{\rm acc}}
+% \def\cl{{\rm cl}}
+% \def\sint{{\rm int}}
+% \def\ext{{\rm ext}}
+% \def\lnullity{{\rm nullity}}
+% \DeclareSIUnit\clight{\text{\ensuremath{c}}}
+% \DeclareSIUnit\fm{\femto\m}
+% \DeclareSIUnit\hplanck{\text{\ensuremath{h}}}
+
+
+% \lstdefinelanguage{julia}%
+%   {morekeywords={abstract,break,case,catch,const,continue,do,else,elseif,%
+%       end,export,false,for,function,immutable,import,importall,if,in,%
+%       macro,module,otherwise,quote,return,switch,true,try,type,typealias,%
+%       using,while},%
+%    sensitive=true,%
+% %    alsoother={$},%
+%    morecomment=[l]\#,%
+%    morecomment=[n]{\#=}{=\#},%
+%    morestring=[s]{"}{"},%
+%    morestring=[m]{'}{'},%
+% }[keywords,comments,strings]%
+
+% \lstset{%
+%     language         = Julia,
+%     basicstyle       = \ttfamily,
+%     keywordstyle     = \bfseries\color{blue},
+%     stringstyle      = \color{magenta},
+%     commentstyle     = \color{ForestGreen},
+%     showstringspaces = false,
+% }
+
+% $
+\onehalfspacing
+\begin{document}
+\begin{center}
+	\hrule
+	\vspace{.4cm}
+	{\textbf { \large Replica Symmetry Breaking in Ecological Models}}
+\end{center}
+ Emmy Blumenthal \hspace{\fill} \hspace{\fill}  \textbf{} \textbf{Date:} \today\  
+%  \\
+% \textbf{Date:}\  Dec 7, 2022   \hspace{\fill} \textbf{Email:}\ emmyb320@bu.edu 
+\vspace{.4cm}
+\hrule
+
+\tableofcontents
+\section{Lotka-Volterra Dyanmics (following Guy Bunin)}
+
+
+\subsection{Setup}
+
+The Lotka-Volterra model describes the dynamics of the populations $N_i$ of species $i = 1,\dots,S$ with the following differential equations:
+\begin{align}
+	\frac{dN_i}{dt}
+	=
+	\frac{r_i}{K_i} N_i
+	\left(
+		K_i - N_i - \sum_{j \in \{1,\dots,S\}\setminus \{i\}}\alpha_{ij} N_j,
+	\right) 
+\end{align}
+where $r_i$ is a natural growth rate of species $i$, $K_i$ is the natural carrying capacity of species $i$, and $\alpha_{ij}$ describe the interactions between species $i$ and $j$.
+In this analysis, we will assume that these parameters are drawn from normal distributions.
+We will take,
+\begin{gather}
+	K_i = {K} + \sigma_K Z_{i}^{(K)},
+	\qquad Z_{i}^{(K)} \sim N(0,1),
+	\qquad \langle Z^{(K)}_i Z^{(K)}_j \rangle = \delta_{ij}
+	\\
+	% r_i = \frac{\mu_r}{S}+\frac{\sigma_r}{\sqrt{S}}Z_i^{(r)}, \qquad Z_i^{(r)} \sim N(0,1),
+	% \qquad \langle Z^{(r)}_i Z^{(r)}_j \rangle = \delta_{ij},
+	% \\
+	\alpha_{ij}
+	=
+	\frac{\mu_\alpha}{S}
+	+
+	\frac{\sigma_\alpha}{\sqrt{S}}
+	Z^{(\alpha)}_{ij},
+	\qquad
+	Z_{ij}^{(\alpha)} \sim N(0,1),
+	\\
+	\eval{Z_{ij}^{(\alpha)}Z_{ji}^{(\alpha)}}
+	=
+	\gamma(1-\delta_{ij}),
+	\qquad
+	\eval{Z_{ij}^{(\alpha)}Z_{ij}^{(\alpha)}}
+	=
+	1,
+	\qquad
+	\eval{Z_{ij}^{(\alpha)}Z_{kl}^{(\alpha)}}
+	=
+	0
+	,
+	\;(\text{else}).
+	% \langle Z_{ij}^{(\alpha)}Z_{kl}^{(\alpha)}\rangle
+	% =
+	% \delta_{ij}\delta_{ik}\delta_{kl}+\gamma (1-\delta_{ij}) \delta_{jk} \delta_{il}.
+\end{gather}
+This last condition with all these $\delta$s might seem a bit weird; succinctly, it says $\mathrm{Cor}[\alpha_{ij},\alpha_{ji}]=\gamma$ for $i \ne j$ and $\mathrm{Cor}[\alpha_{ij},\alpha_{kl}] = 0$ for $i \ne j,l$ and $j \ne i,k$.
+
+\subsection{Cavity solution}
+
+In order to analyze the behavior of this model for large $S$, we will assume that the species' populations are replica-symmetric, meaning that averaging $N_i$ over all species $i = 1,\dots,S$ in one instantiation of the model and averaging over fluctuations due to $Z_i^{(K)}$ and $Z_{ij}^{(\alpha)}$ in multiple instantiations will yield the same results; this is the assumption of replica symmetry.
+In order to obtain self-consistency equations for the mean species' populations, we perturb the system by adding another species $i = 0$.
+The steady-state conditions are then,
+\begin{gather}
+	% K_i
+	\frac{dN_i}{dt}
+	=
+	0
+	=
+	\overline{N_i}
+	\left(
+		K_i
+		-
+		N_i
+		-
+		\sum_{j \in \{1,\dots,S\} \setminus \{i\}}
+		\alpha_{ij} \overline{N_j}
+		-
+		\alpha_{i0} \overline{N_0}
+	\right)
+	\\
+	% K_0
+	\frac{dN_0}{dt}
+	=
+	0
+	=
+	\overline{N_0}
+	\left(
+		K_0
+		-
+		N_0
+		-
+		\sum_{j=1}^S
+		\alpha_{0j} \overline{N_j}
+	\right).
+\end{gather}
+A line over a variable denotes that it is the steady-state quantity.
+For species $i = 1,\dots,S$, we can treat the addition of species $i = 0$ as a perturbation to the carrying capacities: $K_i \to K_i - \alpha_{i0} \overline{N}_0$, so we model a linear response,
+\begin{align}
+	\overline{N}_j
+	=
+	\overline{N}_{j \setminus 0}
+	-
+	\sum_{k = 1}^S
+	\chi_{jk}
+	\alpha_{k0} \overline{N}_0,
+\end{align}
+where we have defined the susceptibility:
+\begin{align}
+	\chi_{jk}
+	=
+	\frac{\partial \overline{N}_j}{\partial K_k}.
+\end{align}
+Substituting this into the steady-state condition for species $i = 0$,
+\begin{align}
+	0 = \overline{N}_0
+	\left(
+		K_0
+		-
+		\overline N_0
+		-
+		\sum_{j=1}^S
+		\alpha_{0j} 
+		\overline{N}_{j \setminus 0}
+		+
+		\sum_{j,k=1}^S
+		\alpha_{0j} \chi_{jk} \alpha_{k0} \overline{N}_0
+	\right).
+\end{align}
+The last term is self-averaging (i.e., has variance of order $O(S^{-1})$) with mean,
+\begin{align}
+	\left\langle
+		\sum_{j,k=1}^S \alpha_{0j}\chi_{jk}\alpha_{k0} \overline{N}_0
+	\right\rangle
+	\nonumber
+	&=
+	\overline{N}_0
+	\sum_{j,k=1}^S
+	\chi_{jk}
+	\langle\alpha_{0j} \alpha_{k0}\rangle
+	=
+	\overline{N}_0
+	\sum_{j,k=1}^S
+	\chi_{jk}
+	\left\langle
+		(\frac{\mu_\alpha}{S} + \frac{\sigma_\alpha}{\sqrt{S} }Z_{0j}^{(\alpha)})
+		(\frac{\mu_\alpha}{S} + \frac{\sigma_\alpha}{\sqrt{S} }Z_{k0}^{(\alpha)})
+	\right\rangle
+	\\
+	&=
+	\overline{N}_0
+	\sum_{j,k=1}^S
+	\chi_{jk}
+	\left(
+		\frac{\mu_\alpha^2}{S^2}
+		+
+		\frac{\sigma_\alpha^2}{S}
+		\left\langle
+			Z_{0j}^{(\alpha)}Z_{k0}^{(\alpha)}
+		\right\rangle
+	\right)
+	=
+	\overline{N}_0
+	\sum_{j,k=1}^S
+	\chi_{jk}
+	\left(
+		\frac{\mu_\alpha^2}{S^2}
+		+
+		\frac{\sigma_\alpha^2}{S}
+		\gamma \delta_{jk}
+	\right)
+	\nonumber
+	\\
+	&=
+	\overline{N}_0
+	\sigma_\alpha^2
+	\gamma
+	\chi
+	+
+	O(S^{-1/2}),
+\end{align}
+where we define, $\chi = \frac{1}{S} \sum_{i=1}^S \chi_{ii}$.
+The second term has mean,
+\begin{align}
+	\left\langle
+		\sum_{j=1}^S \left(
+			\frac{\mu_\alpha}{S}
+			+
+			\frac{\sigma_\alpha}{\sqrt{S}} Z_{0j}^{(\alpha)}
+		\right) \overline{N}_{j\setminus 0}
+	\right\rangle
+	=
+	\frac{\mu_\alpha}{S} S \langle N\rangle
+	+
+	\frac{\sigma_\alpha}{\sqrt{S}}\sum_{j=1}^S \left\langle Z_{0j}^{(\alpha)} \overline{N}_{j \setminus 0}\right\rangle
+	=
+	\mu_\alpha \langle N\rangle,
+\end{align}
+where we have used $\langle Z_{0j}^{(\alpha)} \overline N_{j\setminus 0}\rangle 
+=
+\langle Z_{0j}^{(\alpha)}\rangle \langle \overline N_{j\setminus 0}\rangle
+$.
+The second moment of the second term is,
+\begin{align}
+	\left\langle
+		\left(
+			\sum_{j=1}^S \left(
+				\frac{\mu_\alpha}{S}
+				+
+				\frac{\sigma_\alpha}{\sqrt{S}} Z_{0j}^{(\alpha)}
+			\right) \overline{N}_{j\setminus 0}
+		\right)^2
+	\right\rangle
+	&=
+	\left\langle
+			\sum_{j,k=1}^S \left(
+					\frac{\mu_\alpha^2}{S^2}
+					+
+					\frac{\mu_\alpha}{S}
+					\frac{\sigma_\alpha}{\sqrt{S}} (Z_{0k}^{(\alpha)}+Z_{0j}^{(\alpha)})
+				% +
+				% \frac{\sigma_\alpha}{\sqrt{S}} 
+				% 	\frac{\mu_\alpha}{S}
+					+
+					\frac{\sigma_\alpha^2}{S} 
+					Z_{0j}^{(\alpha)}
+					% \frac{\sigma_\alpha}{\sqrt{S}} 
+					Z_{0k}^{(\alpha)}
+			\right)
+			\overline{N}_{k\setminus 0} \overline{N}_{j\setminus 0}
+	\right\rangle
+	\nonumber
+	\\
+	&=
+	% 0(??)
+	% O(S^{-1/2}) ??
+	\frac{\mu_\alpha^2}{S^2}\sum_{j \ne k}\langle\overline{N}_{k \setminus 0}\rangle\langle\overline{N}_{j \setminus 0}\rangle
+	+
+	\frac{\mu_\alpha^2}{S^2}
+	\sum_{j = 1}^S\langle \overline{N}_{j \setminus 0}^2 \rangle
+	+ 0 + 
+	\frac{\sigma_\alpha^2}{S}\sum_{j,k=1}^S\langle \overline{N}_{k \setminus 0}\overline{N}_{j \setminus 0}\rangle\gamma \delta_{jk}
+	\nonumber
+	\\
+	&=
+	\mu_\alpha^2 \langle N \rangle^2
+	+
+	(\mu_\alpha^2 
+	+
+	\gamma
+	\sigma_\alpha^2) q
+	,
+\end{align}
+where,
+\begin{align}
+	q = \frac{1}{S} \sum_{i=1}^S \overline{N}_{i \setminus 0}^2.
+\end{align}
+If we model the second term as a normal random variable because it is a sum of independently-distributed normal random variables, we have,
+\begin{align}
+	0 &= \overline{N}_0
+	\left(
+		{K}
+		% + 
+		% {\sigma_K}
+		-
+		\overline N_0
+		-
+		\mu_\alpha \langle N \rangle 
+		+ \sqrt{\sigma_K^2 + q (\mu_\alpha^2 + \gamma\sigma_\alpha^2)}Z
+		+
+		\overline{N}_0 \sigma_\alpha^2 \gamma \chi 
+	\right)
+	\\
+	&
+	=\overline{N}_0 \left(
+		g-\overline N_0 + \sigma_g Z + \overline{N}_0 \sigma_\alpha^2 \gamma \chi 
+	\right)
+	,
+\end{align}
+where $Z \sim N(0,1)$, and,
+\begin{align}
+	g = K - \mu_\alpha\langle N\rangle,
+	\qquad 
+	\sigma_g^2 = \sigma_K^2 + q(\mu_\alpha^2 + \gamma \sigma_\alpha^2).
+\end{align}
+Solving for $\overline{N}_0$ and keeping only physically-sensible solutions give,
+\begin{align}
+	\mathcolorbox{
+	\overline N_0
+	=
+	\max
+	\left\{
+		0,
+		\frac{g + \sigma_g Z}{1-\gamma \sigma_\alpha^2  \chi}
+	\right\}}.
+\end{align}
+
+\subsection{Ramp function-transformed normal distribution\label{rampNormal}}
+
+In these computations, we regularly work with normal distributions that are transformed by the `ramp' function: $\mathrm{ramp}(x) = \max\{0,x\} = x \Theta(x)$.
+If $Z$ is a standard normal random variable, the PDF of $\mathrm{ramp}(\sigma Z + \mu)$ is,
+\begin{align}
+	p_{\mathrm{ramp}(\sigma Z + \mu)}(z)
+	=
+	\delta(z) \Phi(-\mu/\sigma)
+	+
+	\frac{1}{\sqrt{2\pi}\sigma} e^{-(z-\mu)^2 / 2\sigma^2}\Theta(z),
+\end{align}
+where,
+\begin{align}
+	\Phi(x)	= \frac{1}{\sqrt{2\pi}}\int_{-\infty}^x e^{-z^2/2} dz
+	=
+	\frac{1}{2}\left(
+		1+\mathrm{erf}(x/\sqrt{2})
+	\right),
+\end{align}
+is the standard normal CDF.
+The $j$th ($j\geq 1$) moment is then,
+\begin{align}
+	W_j(\mu,\sigma)
+	&=
+	\langle\mathrm{ramp}(\sigma Z + \mu)^j\rangle
+	=
+	0+
+	\frac{1}{\sqrt{2\pi}\sigma}
+	\int_0^\infty 
+	dz
+	z^j
+	e^{-(z-\mu)^2/2\sigma^2}
+	=
+	\sigma^j
+	\int_{-\mu/\sigma}^\infty 
+	\frac{dz}{\sqrt{2\pi}}
+	e^{-z^2/2}
+	( z+\mu/\sigma)^j,
+	\\
+	&=
+	\frac{2^{-3/2}}{\sqrt{\pi}}(\sqrt{2} \sigma)^j
+	\left[j\frac{\mu}{\sigma }  \Gamma \left(\frac{j}{2}\right) \, _1F_1\left(\frac{1-j}{2};\frac{3}{2};-\frac{\mu ^2}{2 \sigma ^2}\right)
+	+
+	\sqrt{2} \Gamma \left(\frac{j+1}{2}\right) \, _1F_1\left(-\frac{j}{2};\frac{1}{2};-\frac{\mu ^2}{2 \sigma ^2}\right)\right]
+	% \\
+	% &=
+	% \begin{cases}
+	% 	j!! \mu \sigma^{j-1} {}_1 F_1\left(\frac{1-j}{2},\frac{3}{2};-\frac{\mu^2}{2\sigma^2}\right)
+	% 	&
+	% 	\text{$j$ odd}\\
+	% 	(j-1)!! \sigma^j {}_1 F_1\left(-\frac{j}{2},\frac{1}{2};-\frac{\mu^2}{2\sigma^2}\right)
+	% 	&
+	% 	\text{$j$ even}
+	% \end{cases}
+	,
+\end{align}
+where $\,_1 F_1$ is the confluent hypergeometric function of the first kind.
+Observe that $W_j(\mu/\alpha , \sigma/\alpha) = \alpha^{-j}W_j(\mu,\sigma)$.
+% \footnote{I'm almost certain there's something wrong with line 61 of the reference.
+% Checked it against histograms and {\em Mathematica} code\dots
+% }
+Additionally,
+\begin{align}
+	W_0(x,1)
+	&= 1\\
+	W_1(x,1)
+	&=
+	\frac{1}{\sqrt{2\pi}} e^{-x^2/2} + x \Phi(x),
+	\\
+	W_2(x,1)
+	&=
+	\frac{1}{\sqrt{2\pi}}x e^{-x^2/2} + (1+x^2) \Phi(x).
+\end{align}
+(Note: $w_0$ from other papers is just $\Phi$; all other $w_j$ match up for $j \geq 1$.)
+It follows from integration by parts,
+\begin{align}
+	W_2(x,1) = \Phi(x) + x W_1(x,1).
+	\label{intByPartsID}
+\end{align}
+For a random variable $\Theta(\sigma Z + \mu)$, the PDF is,
+\begin{align}
+	p_{\Theta(\sigma Z + \mu)} (z)
+	=
+	\frac{1}{2}
+	(
+		1 + \mathrm{erf}\left(
+			\frac{\mu}{\sigma\sqrt{2}}
+		\right)
+	)
+	\delta(z-1)
+	+
+	\frac{1}{2}
+	\mathrm{erfc}\left(
+			\frac{\mu}{\sigma\sqrt{2}}
+		\right)
+	\delta(z),
+\end{align}
+so the $j$th moment ($j \geq 1$) is,
+\begin{align}
+	% w_j(\mu,\sigma)
+	% =
+	\langle\Theta(\sigma Z + \mu)^j\rangle
+	=
+	0
+	+
+	\frac{1}{2}
+	(
+		1 + \mathrm{erf}\left(
+			\frac{\mu}{\sigma\sqrt{2}}
+		\right)
+	) 1^j
+	=
+	\frac{1}{2}
+	(
+		1 + \mathrm{erf}\left(
+			\frac{\mu}{\sigma\sqrt{2}}
+		\right)
+	)
+	=
+	\Phi(\mu/\sigma).
+\end{align}
+
+\subsection{Self-consistency equations}
+
+The fraction of surviving species is,
+\begin{align}
+	\phi = \langle  \Theta(\overline{N}_0)\rangle
+	=
+	\langle \Theta(g + \sigma_g Z)\rangle
+	=
+	\Phi(\Delta),
+\end{align}
+where $\Delta = g/\sigma_g$.
+Taking a derivative of the cavity solution for $\overline N_0 $ gives,
+\begin{gather}
+	\frac{\partial \overline N_0}{\partial K}
+	=
+	\frac{\partial}{\partial K}
+	\frac{g + \sigma_g Z}{1-\gamma \sigma_\alpha^2 \chi}
+	\Theta\left(\frac{g + \sigma_g Z}{1-\gamma \sigma_\alpha^2 \chi}\right)
+	=
+	\frac{\Theta(\overline{N}_0)}{1-\gamma \sigma_\alpha^2 \chi}
+	+
+	\text{$\delta$-term}
+	\implies
+	\left\langle \frac{\partial \overline N_0}{\partial K} \right\rangle
+	=
+	\frac{\phi}{1-\gamma \sigma_\alpha^2 \chi}
+	\nonumber
+	\\
+	\implies
+	\chi = \frac{\phi}{1-\chi \gamma \sigma_\alpha^2}.
+	\label{LVchiselfconsist}
+\end{gather}
+Additionally,
+\begin{align}
+	\langle N\rangle
+	&=
+	\langle\overline N_0\rangle
+	=
+	\frac{\sigma_g}{1-\gamma\sigma_\alpha^2 \chi}
+	W_1(\Delta,1)
+	=
+	\frac{\sigma_g}{1-\gamma\sigma_\alpha^2 \chi}
+	\left(
+		\frac{e^{-\Delta^2/2}}{\sqrt{2\pi}}
+		+
+		\Delta\Phi(\Delta)
+	\right),
+	\\
+	q &= 
+	\langle \overline N_0^2\rangle
+	=
+	\left(
+		\frac{\sigma_g}{1-\gamma\sigma_\alpha^2 \chi}
+	\right)^2
+	W_2\left(
+		\Delta,1
+	\right)
+	=
+	\left(
+		\frac{\sigma_g}{1-\gamma\sigma_\alpha^2 \chi}
+	\right)^2
+	\left[
+		\frac{\Delta e^{-\Delta^2/2}}{\sqrt{2\pi}}
+		+
+		(1+\Delta^2)\Phi(\Delta)
+	\right].
+\end{align}
+These constitute the self-consistency equations for the Lotka-Volterra model.
+Here is a summary of the results:
+\begin{gather}
+	\mathcolorbox{
+		\phi
+		=
+		\Phi(\Delta)
+	}
+	\\
+	\mathcolorbox{
+		\chi = \frac{\phi}{1-\chi \gamma\sigma_\alpha^2}
+	}
+	\\
+	\mathcolorbox{
+		\eval{N}
+		=
+		\frac{\sigma}{1-\gamma\sigma_\alpha^2 \chi}
+		W_1(\Delta,1)
+	}
+	\\
+	\mathcolorbox{
+		q
+		=
+		\left(\frac{\sigma_g}{1-\gamma\sigma_\alpha^2\chi}\right)^2
+		W_2(\Delta,1)
+	}
+	\\
+	\mathcolorbox{
+		g=K-\mu_\alpha \eval{N}
+	}
+	\\
+	\mathcolorbox{
+		\sigma_g^2 = \sigma_K^2 + q\left(
+			\mu_\alpha^2 + \gamma \sigma_\alpha^2
+		\right)
+	}
+	\\
+	\mathcolorbox{
+		\Delta = g/\sigma_g
+	}
+\end{gather}
+Using the integration-by-parts identity (\ref{intByPartsID}), these quantities can be related explicitly as,
+\begin{gather}
+	\left(
+		\sigma_g\chi/\phi
+		% \frac{\sigma_g}{1-\gamma\sigma_\alpha^2 \chi}
+	\right)^{-2}
+	q
+	=
+	\phi
+	+
+	\Delta
+	\left(
+		\sigma_g\chi/\phi
+		% \frac{\sigma_g}{1-\gamma\sigma_\alpha^2 \chi}
+	\right)^{-1}
+	\langle N\rangle
+	\implies
+	\phi
+	q
+	=
+	\sigma_g^2\chi^2
+	+
+	g\chi
+	\langle N\rangle
+	\\
+	\implies
+	\phi
+	q
+	=
+	[\sigma_K^2 + q(\mu_\alpha^2 + \gamma \sigma_\alpha^2)]\chi^2
+	+
+	(K - \mu_\alpha \langle N\rangle)\chi\langle N\rangle
+\end{gather}
+
+\subsection{Stability analysis}
+
+Looking at the steady-state condition for the $i=0$ species and incorporating that the last term is self-averaging,
+\begin{align}
+	0
+	&=
+	\overline N_0
+	\left(
+		K_0
+		-
+		\overline N_0
+		-
+		\sum_{j=1}^S \alpha_{0j}\overline N_{j\setminus0}
+		+
+		\overline N_0 \sigma_\alpha^2 \gamma \chi
+	\right)
+	\\
+	&=
+	\overline N_0
+	\left(
+		g
+		% K_0
+		% % -
+		% % \overline N_0
+		% -
+		% \mu_\alpha \eval{N}
+		% \frac{\mu_\alpha}{S}
+		% \sum_{j=1}^S\overline N_{j\setminus0}
+		-
+		\frac{\sigma_\alpha}{\sqrt{S}}
+		\sum_{j=1}^S
+		Z_{0j}^{(\alpha)}\overline N_{j\setminus0}
+		+
+		\overline N_0 (\sigma_\alpha^2 \gamma \chi -1)
+		+
+		\sigma_K \delta K_0
+	\right).
+\end{align}
+For surviving species, we can solve to find,
+\begin{align}
+	\overline N_0^+
+	=
+	\frac{1}{1-\sigma_\alpha^2 \gamma \chi}
+	\left(
+	g
+	-
+	\frac{\sigma_\alpha}{\sqrt{S}}
+	\sum_{i,\overline N_i>0} Z_{0i}^{(\alpha)}\overline N_{i\setminus 0}^+
+	+
+	\sigma_K \delta K_0
+	\right)
+\end{align}
+Next, we perturb the surviving species $\overline N_0^+ \to \overline N_0^+ + \varepsilon\eta_i$, where $\eta_i$ is unit normal random variable which is independent of all other sources of randomness and $\varepsilon$ is a small variable controlling the strength of the perturbation.
+After applying the perturbation and differentiating with respect to $\varepsilon$, we obtain,
+\begin{gather}
+	\frac{d\overline N_0^+}{d\varepsilon}
+	=
+	\frac{\sigma_\alpha/\sqrt{S}}{\sigma_\alpha^2 \gamma \chi-1}
+	% \frac{\sigma_\alpha}{\sqrt{S}}
+	\sum_{i,\overline N_i>0} Z_{0i}^{(\alpha)}\left(
+		\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+		+
+		\eta_i
+	\right),\\
+	\left[
+		\frac{d\overline N_0^+}{d\varepsilon}
+	\right]^2
+	=
+	% \left(
+		\frac{\sigma_\alpha^2 S^{-1}}{\left(\sigma_\alpha^2 \gamma \chi - 1\right)^2}
+		% \right)^2
+		% \frac{1}{S}
+	\sum_{i,j,\overline N_i>0,\overline N_j>0} 
+	Z_{0i}^{(\alpha)}
+	Z_{0j}^{(\alpha)}
+	\left(
+		\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+		+
+		\eta_i
+	\right)
+	\left(
+		\frac{d\overline N_{j\setminus 0}^+}{d\varepsilon}
+		+
+		\eta_j
+	\right).
+\end{gather}
+Averaging over all sources of randomness yields,
+\begin{align}
+	\eval{\left[
+		\frac{d\overline N_0^+}{d\varepsilon}
+	\right]^2}
+	&=
+	% \left(\frac{\sigma_\alpha}{\sigma_\alpha^2 \gamma \chi - 1}\right)^2 \frac{1}{S}
+	\frac{\sigma_\alpha^2 S^{-1}}{\left(\sigma_\alpha^2 \gamma \chi - 1\right)^2}
+	\sum_{i,j,\overline N_i>0,\overline N_j>0} 
+	\eval{
+		Z_{0i}^{(\alpha)}
+		Z_{0j}^{(\alpha)}
+	}
+	\left(
+		\eval{\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+		\frac{d\overline N_{j\setminus 0}^+}{d\varepsilon}}
+		+
+		\eval{\eta_i}
+		\eval{\frac{d\overline N_{j\setminus 0}^+}{d\varepsilon}}
+		+
+		\eval{\eta_j}
+		\eval{\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}}
+	% \right)
+	% \left(
+		+
+		\eval{\eta_i
+		\eta_j}
+	\right)
+	\nonumber
+	\\
+	&=
+	\frac{\sigma_\alpha^2 S^{-1}}{\left(\sigma_\alpha^2 \gamma \chi - 1\right)^2}
+	\sum_{i,j,\overline N_i>0,\overline N_j>0} 
+	% \eval{
+		\delta_{ij}
+	% }
+	\left(
+		\eval{\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+		\frac{d\overline N_{j\setminus 0}^+}{d\varepsilon}}
+		% +
+		% \eval{\eta_i}
+		% \eval{\frac{d\overline N_{j\setminus 0}^+}{d\varepsilon}}
+		% +
+		% \eval{\eta_j}
+		% \eval{\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}}
+	% \right)
+	% \left(
+		+
+		\delta_{ij}
+		% \eval{\eta_i
+		% \eta_j}
+	\right)
+	\nonumber
+	\\
+	&=
+	\frac{\sigma_\alpha^2 \phi}{\left(\sigma_\alpha^2 \gamma \chi - 1\right)^2}
+	\left(
+		\eval{\left[
+		\frac{d\overline N_0^+}{d\varepsilon}
+	\right]^2}
+	+
+	1
+	\right).
+\end{align}
+Solving for $\eval{\left[
+	\frac{d\overline N_0^+}{d\varepsilon}
+\right]^2}$ gives,
+\begin{align}
+	\mathcolorbox{
+	\eval{\left[
+		\frac{d\overline N_0^+}{d\varepsilon}
+	\right]^2}
+	=
+	\frac{\sigma_\alpha^2 \phi}{(1-\chi \gamma \sigma_\alpha^2)^2 - \sigma_\alpha^2 \phi}}.
+\end{align}
+This quantity diverges, meaning that, in a typical ecosystem, at least one species becomes unstable upon perturbation when,
+\begin{align}
+	\mathcolorbox{(1-\chi^\star\gamma(\sigma_\alpha^\star)^2)^2 - (\sigma_\alpha^\star)^2 \phi^\star=0}.
+\end{align}
+We may solve this equation for $\chi^\star$ to find, $\chi^\star = \frac{1\pm \sigma_\alpha^\star\sqrt{\phi^\star}}{\gamma(\sigma_\alpha^\star)^2}$.
+Substituting this result into $1-\chi\gamma\sigma_\alpha^2 - \phi/\chi = 0$ from the self-consistency equation for the susceptibility and keeping only the physically-sensible solution yields,
+\begin{align}
+	1 + \frac{\gamma}{1 \pm (\sigma_\alpha^\star \sqrt{\phi^\star})^{-1}}
+	=
+	0
+	\implies
+	\mathcolorbox{
+	\frac{1}{\sigma_\alpha^\star}
+	=
+	\sqrt{\phi^\star}
+	\left(
+		1+\gamma
+	\right)}.
+\end{align}
+
+% Using the $1-\chi\gamma\sigma_\alpha^2 = \phi/\chi \implies 
+% A
+% $ from the self-consistency equation, this is equivalent to,
+% \begin{align}
+% 	\sigma_\alpha^2 = \phi/\chi^2
+% \end{align}
+
+% Perturbing the non-zero species populations $\overline N_i^+$ with $\varepsilon \eta_i$, where $\eta_i$ is an independent random perturbation with zero mean, we have,
+% \begin{align}
+% 	0=
+% 	g
+% 	-
+% 	\frac{\sigma_\alpha}{\sqrt{S}}
+% 	\sum_{i,\overline N_i>0}
+% 	Z_{0i}^{(\alpha)}\left(
+% 		\overline N_{i\setminus 0}^+
+% 		+
+% 		\varepsilon \eta_i
+% 	\right)
+% 	+
+% 	\left(\sigma_\alpha^2 \gamma \chi - 1\right)
+% 	\left(\overline N_0^+ + \varepsilon \eta_0 \right)
+% 	+
+% 	\sigma \delta K_0.
+% \end{align}
+% Solving for $\overline N_0^+$ gives,
+% \begin{align}
+	
+% \end{align}
+% Differentiating with respect to $\varepsilon$ gives,
+% \begin{align}
+% 	0=
+% 	-
+% 	\frac{\sigma_\alpha}{\sqrt{S}}
+% 	\sum_{i,\overline N_i>0}
+% 	Z_{0i}^{(\alpha)}\left(
+% 		\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\eta_i
+% 	\right)
+% 	+
+% 	\left(\sigma_\alpha^2 \gamma \chi - 1\right)
+% 	\left(
+% 		\frac{d\overline N_0^+}{d\varepsilon} + \eta_0 
+% 	\right).
+% \end{align}
+% Solving for $\frac{d\overline N_0^+}{d\varepsilon}$ and squaring yields,
+% \begin{align}
+% 	\left(\frac{d\overline N_0^+}{d\varepsilon}\right)^2
+% 	&=
+% 	\left(
+% 		\frac{\sigma_\alpha/\sqrt{S}}{\sigma_\alpha^2 \gamma \chi - 1}
+% 		\sum_{i,\overline N_i>0}
+% 		Z_{0i}^{(\alpha)}\left(
+% 			\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+% 			+
+% 			\eta_i
+% 		\right)
+% 		-
+% 		\eta_0
+% 	\right)^2
+% 	\\
+% 	&=
+% 	\frac{\sigma_\alpha^2/S}{(\sigma_\alpha^2 \gamma \chi - 1)^2}
+% 	\sum_{i,\overline N_i>0}
+% 	\sum_{j,\overline N_j>0}
+% 	Z_{0i}^{(\alpha)}
+% 	Z_{0j}^{(\alpha)}
+% 	\left(
+% 		\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\eta_i
+% 	\right)
+% 	\left(
+% 		\frac{d\overline N_{j\setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\eta_j
+% 	\right)
+% 	\\
+% 	\nonumber
+% 	&\quad
+% 	-
+% 	2
+% 	\eta_0
+% 	\frac{\sigma_\alpha/\sqrt{S}}{\sigma_\alpha^2 \gamma \chi - 1}
+% 	\sum_{i,\overline N_i>0}
+% 	Z_{0i}^{(\alpha)}\left(
+% 		\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\eta_i
+% 	\right)
+% 	+
+% 	\eta_0^2.
+% \end{align}
+% Averaging over all sources of randomness gives,
+% \begin{align}
+% 	\eval{\left(\frac{d\overline N_0^+}{d\varepsilon}\right)^2}
+% 	&=
+% 	\frac{\sigma_\alpha^2/S}{(\sigma_\alpha^2 \gamma \chi - 1)^2}
+% 	\sum_{i,\overline N_i>0}
+% 	\sum_{j,\overline N_j>0}
+% 	% Z_{0i}^{(\alpha)}
+% 	% Z_{0j}^{(\alpha)}
+% 	\delta_{ij}
+% 	\left(
+% 		\eval{
+% 		\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+% 		\frac{d\overline N_{j\setminus 0}^+}{d\varepsilon}
+% 		}
+% 		+
+% 		0
+% 		+
+% 		0
+% 		+
+% 		\delta_{ij}
+% 	\right)
+% 	% \\
+% 	% \nonumber
+% 	% &\quad
+% 	-
+% 	0
+% 	% 2
+% 	% \eta_0
+% 	% \frac{\sigma_\alpha/\sqrt{S}}{\sigma_\alpha^2 \gamma \chi - 1}
+% 	% \sum_{i,\overline N_i>0}
+% 	% Z_{0i}^{(\alpha)}\left(
+% 	% 	\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+% 	% 	+
+% 	% 	\eta_i
+% 	% \right)
+% 	+
+% 	% \eta_0^2
+% 	1
+% 	\nonumber
+% 	\\
+% 	&=
+% 	\frac{\phi_N\sigma_\alpha^2}{(\sigma_\alpha^2 \gamma \chi - 1)^2}
+% 	% \sum_{i=1}^S
+% 	% \sum_{i,\overline N_i>0}
+% 	% Z_{0i}^{(\alpha)}
+% 	% Z_{0j}^{(\alpha)}
+% 	\left[
+% 		\eval{
+% 		\left(\frac{d\overline N_{0}^+}{d\varepsilon}\right)^2
+% 		}
+% 		% +
+% 		% 0
+% 		% +
+% 		% 0
+% 		+
+% 		1
+% 	\right]
+% 	+1.
+% \end{align}
+% \begin{align}
+% 	0
+% 	=
+% 	K_0 
+% 	- 
+% 	\left(
+% 		\sigma_\alpha^2 \gamma \chi - 1
+% 	\right)
+% 	\left(
+% 		\overline N_0^+ 
+% 		+ \varepsilon \eta_0
+% 	\right)
+% 	-
+% 	\sum_{j,\overline N_i>0} \alpha_{0j}
+% 	 \left(
+% 		\overline N_{j\setminus0}^+ + \varepsilon \eta_i
+% 	\right).
+% \end{align}
+% Differentiating with respect to $\varepsilon$,
+% \begin{align}
+% 	0
+% 	=
+% 	\left(
+% 		1-\sigma_\alpha^2 \gamma \chi
+% 	\right)
+% 	\left(
+% 		\frac{d\overline N_0^+ }{d\varepsilon}
+% 		+
+% 		\eta_0
+% 	\right)
+% 	-
+% 	\sum_{j,\overline N_i>0} \alpha_{0j}
+% 		\left(
+% 		\frac{d\overline N_{j\setminus0}^+}{d\varepsilon}
+% 		+
+% 		\eta_i
+% 	\right).
+% \end{align}
+% Solving for $\frac{d\overline N_0^+ }{d\varepsilon}$ gives,
+% \begin{align}
+% 	\frac{d\overline N_0^+ }{d\varepsilon}
+% 	=
+% 	\frac{1}{1-\sigma_\alpha^2 \gamma \chi}
+% 	\sum_{i,\overline N_i>0} \alpha_{0i}
+% 		\left(
+% 		\frac{d\overline N_{i\setminus0}^+}{d\varepsilon}
+% 		+
+% 		\eta_i
+% 	\right)
+% 	-\eta_0
+% 	.
+% \end{align}
+% Next, we can square both sides:
+% \begin{align}
+% 	\left(\frac{d\overline N_0^+ }{d\varepsilon}\right)^2
+% 	&=
+% 	\left(
+% 		1-\sigma_\alpha^2 \gamma\chi
+% 	\right)^{-2}
+% 	\sum_{i,\overline N_i > 0}
+% 	\sum_{j,\overline N_j > 0}
+% 	\alpha_{0i}\alpha_{0j}
+% 	\left(
+% 		\frac{d \overline N_{i\setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\eta_i
+% 	\right)
+% 	\left(
+% 		\frac{d \overline N_{j\setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\eta_j
+% 	\right)
+% 	\nonumber
+% 	\\
+% 	&\quad-2\left(1-\sigma_\alpha^2 \gamma \chi\right)^{-1}
+% 	\eta_0
+% 	\sum_{i,\overline N_i > 0}
+% 	\alpha_{0i}
+% 	\left(
+% 		\frac{i \overline N_{i\setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\eta_i
+% 	\right)
+% 	+
+% 	\eta_0^2
+% \end{align}
+% Averaging over all sources of randomness gives,
+% \begin{align}
+% 	\eval{\left(\frac{d\overline N_0^+ }{d\varepsilon}\right)^2}
+% 	&=
+% 	\left(
+% 		1-\sigma_\alpha^2 \gamma\chi
+% 	\right)^{-2}
+% 	\sum_{i,\overline N_i > 0}
+% 	\sum_{j,\overline N_j > 0}
+% 	% \eval{
+% 		% \alpha_{0i}
+% 		% \alpha_{0j}
+% 		\left(
+% 			\left(\frac{\mu_\alpha}{S}\right)^2
+% 			+
+% 			% \frac{\mu_\alpha}{S}
+% 			% \frac{\sigma_\alpha}{\sqrt{S}} Z_{0j}^{(\alpha)}
+% 			0
+% 			+
+% 			% \frac{\sigma_\alpha}{\sqrt{S}} Z_{0i}^{(\alpha)}
+% 			% \frac{\mu_\alpha}{S} 
+% 			0
+% 			+
+% 			\frac{\sigma_\alpha^2}{S}
+% 			\delta_{ij}
+% 			% \eval{
+% 			% Z_{0i}^{(\alpha)}
+% 			% Z_{0j}^{(\alpha)}}
+% 			% \frac{\sigma_\alpha}{\sqrt{S}} 
+% 		\right)
+% 		% }
+% 	\left(
+% 		\eval{\frac{d \overline N_{i\setminus 0}^+}{d\varepsilon}
+% 		\frac{d \overline N_{j\setminus 0}^+}{d\varepsilon}}
+% 		+
+% 		0
+% 		% \frac{d \overline N_{i\setminus 0}^+}{d\varepsilon}
+% 		% \eta_j
+% 		+
+% 		0
+% 		% \eta_i
+% 		% \frac{d \overline N_{j\setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\delta_{ij}
+% 	\right)
+% 	\nonumber
+% 	\\
+% 	&
+% 	+
+% 	0
+% 	+
+% 	1
+% \end{align}
+% \begin{align}
+% 	0
+% 	&=
+% 	K_0 
+% 	-
+% 	\sum_{j, \overline{N}_j>0}
+% 	\alpha_{0j} (\overline N_{j\setminus 0}^+ + \varepsilon \eta_{j})
+% 	-
+% 	(1 - \sigma_\alpha^2 \gamma \chi)
+% 	\overline N_0^+
+% 	-
+% 	(1 - \sigma_\alpha^2 \gamma \chi)\varepsilon\eta_0
+% 	\implies
+% 	\\
+% 	\frac{d\overline{N}_0^+}{d\varepsilon}
+% 	&=
+% 	-
+% 	\frac{1}{1-\sigma_\alpha^2 \gamma\chi}
+% 	\sum_{j, \overline{N}_j>0}
+% 	\left(
+% 		\alpha_{0j} \frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+% 		+\alpha_{0j}\eta_j
+% 	\right)
+% 	-\eta_0 
+% 	=
+% 	-
+% 	\frac{\phi}{1-\sigma_\alpha^2 \gamma\chi}
+% 	\sum_{j=1}^S
+% 		\alpha_{0j} \frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+% 	-\eta_0 
+% \end{align}
+% We have used that for large $S$, $\sum_{i=1}^S \eta_j \to 0$.
+% Squaring gives,
+% \begin{align}
+% 	\left(\frac{d\overline{N}_0^+}{d\varepsilon}\right)^2
+% 	&=
+% 	(1-\sigma_\alpha^2 \gamma\chi)^{-2}
+% 	\sum_{i,j,\overline{N}_i>0,\overline{N}_j>0}
+% 	\alpha_{0i}\alpha_{0j}
+% 	\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+% 	\frac{d\overline N_{j\setminus 0}^+}{d\varepsilon}
+% 	-
+% 	2(1-\sigma_\alpha^2 \gamma\chi)^{-1}
+% 	\eta_0
+% 	\sum_{i,\overline N_i >0}
+% 	\alpha_{0i}
+% 	\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+% 	+
+% 	\eta_0^2
+% 	\nonumber
+% 	\\
+% 	&=
+% 	(1-\sigma_\alpha^2 \gamma\chi)^{-2}\phi^2
+% 	\sum_{i,j=1}^S
+% 	% \sum_{i,j,\overline{N}_i>0,\overline{N}_j>0}
+% 	\left(
+% 		\frac{\mu_\alpha^2}{S^2}
+% 			+
+% 			\frac{\mu_\alpha}{S}
+% 			\frac{\sigma_\alpha}{\sqrt{S}} (Z_{0i}^{(\alpha)}+Z_{0j}^{(\alpha)})
+% 		% +
+% 		% % \left(
+% 		% 	\frac{\mu_\alpha}{S}
+% 		% 	\frac{\sigma_\alpha}{\sqrt{S}} 
+% 		% 	Z_{0i}^{(\alpha)}
+% 			+
+% 			\frac{\sigma_\alpha^2}{S} 
+% 			Z_{0i}^{(\alpha)}
+% 			Z_{0j}^{(\alpha)}
+% 		% \right)
+% 	\right)
+% 	\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+% 	\frac{d\overline N_{j\setminus 0}^+}{d\varepsilon} 
+% 	\nonumber
+% 	\\
+% 	&\qquad \nonumber
+% 	-
+% 	2(1-\sigma_\alpha^2 \gamma\chi)^{-1}
+% 	\eta_0
+% 	\phi
+% 	\sum_{i}
+% 	\alpha_{0i}
+% 	\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+% 	+
+% 	\eta_0^2 
+% \end{align}
+% If we average over fluctuations in $\alpha_{ij}$ then fluctuations due to $\eta_0$, we arrive at,
+% \begin{align}
+% 	% \\
+% 	% \implies
+% 	\left\langle
+% 		\left(
+% 			\frac{d\overline N_0^+}{d\varepsilon}
+% 		\right)^2
+% 	\right\rangle
+% 	&=
+% 	(1 - \sigma_\alpha^2 \gamma\chi)^{-2}\phi^2
+% 		\sum_{i,j=1}^S
+% 		\left(
+% 		\frac{\mu_\alpha^2}{S^2}
+% 		+
+% 		\gamma
+% 		\frac{\sigma_\alpha^2}{S}
+% 		\delta_{ij} 
+% 		\right)
+% 		\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+% 		\frac{d\overline N_{j\setminus 0}^+}{d\varepsilon}
+% 		-
+% 		2(1-\sigma_\alpha^2 \gamma\chi)^{-1}
+% 		\eta_0
+% 		\phi
+% 		\sum_{i}
+% 		\frac{\mu_\alpha}{S}
+% 		\frac{d\overline N_{i\setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\eta_0^2
+% 		\nonumber
+% 		\\
+% 		\implies
+% 		\left\langle
+% 			\left(
+% 				\frac{d\overline N_0^+}{d\varepsilon}
+% 			\right)^2
+% 		\right\rangle_{\eta,Z}
+% 		&=
+% 		\chi^2\left(\mu_\alpha^2 + \sigma_\alpha^2 \gamma\right)
+% 		\left\langle
+% 			\left(
+% 				\frac{d\overline N_0^+}{d\varepsilon}
+% 			\right)^2
+% 		\right\rangle_{\eta,Z}
+% 		+ 
+% 		\langle\eta_0^2\rangle_{\eta}.
+% 		\\
+% 		\implies
+% 		\left\langle
+% 			\left(
+% 				\frac{d\overline N_0^+}{d\varepsilon}
+% 			\right)^2
+% 		\right\rangle _{\eta,Z}
+% 		&=
+% 		\frac{\langle \eta_0^2\rangle_\eta}{1 - \chi^2 (\mu_\alpha^2 + \sigma_\alpha^2 \gamma)}.
+% \end{align}
+% At least one species becomes unstable upon perturbation when $1 = \chi^2 (\mu_\alpha^2 + \gamma \sigma_\alpha^2)$
+
+
+	% \frac{1}{1-\sigma_\alpha^2\gamma\chi}
+	% \left(
+	% 	\sum_{j,\overline{N}_j>0}
+	% 	\alpha_{0j} \frac{d\overline N_{j\setminus0}^+}{d\varepsilon}
+	% 	+
+	% 	\phi
+	% 	\sum_{j=0}^S
+	% 	\alpha_{0j}
+	% 	-
+	% 	(1-\sigma_\alpha^2 \gamma\chi)\eta_0
+	% \right)
+	% \\
+	% % \frac{d\overline{N}_0^+}{d\varepsilon}
+	% &=
+	% \frac{1}{1-\sigma_\alpha^2\gamma\chi}
+	% \left(
+	% 	\sum_{j,\overline{N}_j>0}
+	% 	\alpha_{0j} \frac{d\overline N_{j\setminus0}^+}{d\varepsilon}
+	% 	+
+	% 	\phi
+	% 	\left(
+	% 		\mu_\alpha + 
+	% 		\sigma_\alpha Z^{(\alpha)}
+	% 	\right)
+	% 	-
+	% 	(1-\sigma_\alpha^2 \gamma\chi)\eta_0
+	% \right)
+% Assuming that $\overline N_0 >0$,
+% \begin{align}
+% 	\overline N_0
+% 	=
+% 	\frac{1}{1-\sigma_\alpha\gamma\chi}
+% 	\left(
+% 		K_0 -\sum_{j=1}^S \alpha_{0j}\overline N_{j\setminus 0}
+% 	\right)
+% \end{align}
+
+
+
+% Looking to the intermediate equation from the cavity equation (where we incorporate the self-averaging of the last term):
+% \begin{align}
+% 	0 = \overline N_0
+% 	\left(
+% 		K_0 - \sum_{j=1}^S \alpha_{0j}\overline N_{j\setminus 0}
+% 		+
+% 		\overline N_0 \sigma_\alpha^2 \gamma \chi
+% 	\right).
+% \end{align}
+% If we perturb each surviving species $N_i^+$ by a small amount $\varepsilon \eta_i$, we obtain,
+% \begin{align}
+% 	0 = K_0 -\sum_{j=1}^S \alpha_{0j} \overline N_{j \setminus 0}
+% 	+
+% 	\overline N_0
+% 	\sigma_\alpha^2 \gamma \chi 
+% 	+
+% 	\sigma_\alpha^2 \gamma \chi 
+% 	\varepsilon \eta_0
+% 	\implies
+% 	\overline N_0
+% 	=
+% 	-\frac{K_0}{\sigma_\alpha^2 \gamma \chi }
+% 	+\frac{1}{\sigma_\alpha^2 \gamma \chi }\sum_{j=1}^S \alpha_{0j} \overline N_{j \setminus 0}
+% 	-
+% 	\varepsilon \eta_0.
+% \end{align}
+% From this, we can compute,
+% \begin{align}
+% 	\frac{d\overline N_0}{d\varepsilon}
+% 	&=
+% 	\frac{1}{\sigma_\alpha^2 \gamma \chi }\sum_{j=1}^S \alpha_{0j}\frac{d\overline N_{j \setminus 0}}{d\varepsilon}
+% 	-
+% 	\eta_0
+% 	\\
+% 	\implies
+% 	\left(\frac{d\overline N_0}{d\varepsilon}\right)^2
+% 	&=
+% 	\left(\frac{1}{\sigma_\alpha^2 \gamma \chi }\sum_{j=1}^S \alpha_{0j}\frac{d\overline N_{j \setminus 0}}{d\varepsilon}
+% 	-
+% 	\eta_0\right)
+% 	\left(\frac{1}{\sigma_\alpha^2 \gamma \chi }\sum_{k=1}^S \alpha_{0j}
+% 	\frac{d\overline N_{k \setminus 0}}{d\varepsilon}
+% 	-
+% 	\eta_0\right)
+% 	\\
+% 	&=
+% 	(\sigma_\alpha^2 \gamma \chi)^{-2}
+% 	\sum_{j,k=1}^S \alpha_{0j}\alpha_{0k}
+% 	\frac{d\overline N_{j \setminus 0}}{d\varepsilon}
+% 	\frac{d\overline N_{k \setminus 0}}{d\varepsilon}
+% 	-
+% 	2 \eta_0(\sigma_\alpha^2\gamma\chi)^{-1}
+% 	\sum_{j=1}^S
+% 	\alpha_{0j}\frac{d\overline N_{j\setminus 0}}{d\varepsilon}
+% 	+
+% 	\eta_0^2.
+% \end{align}
+% The variance of this quantity is,
+% \begin{align}
+% 	\Var\left[
+% 		\left(
+% 			\frac{d\overline N_0}{d\varepsilon}
+% 		\right)^2
+% 	\right]
+% 	&=
+% 	(\sigma_\alpha^2 \gamma \chi)^{-4}
+% 	\sum_{j,k=1}^S \Var\left[\alpha_{0j}\alpha_{0k}\right]
+% 	\Var\left[
+% 	\frac{d\overline N_{j \setminus 0}}{d\varepsilon}
+% 	\frac{d\overline N_{k \setminus 0}}{d\varepsilon}
+% 	\right]
+% 	+
+% 	4 \eta_0^2(\sigma_\alpha^2\gamma\chi)^{-2}
+% 	\sum_{j=1}^S
+% 	\Var[\alpha_{0j}]\Var\left[\frac{d\overline N_{j\setminus 0}}{d\varepsilon}\right]
+% 	\nonumber
+% 	\\
+% 	&=
+% 	(\sigma_\alpha^2 \gamma \chi)^{-4}\sigma_\alpha^4 S^{-2}
+% 	\sum_{j,k=1}^S 
+% 	\gamma^2
+% 	\delta_{jk}
+% 	\Var\left[
+% 	\frac{d\overline N_{j \setminus 0}}{d\varepsilon}
+% 	\frac{d\overline N_{k \setminus 0}}{d\varepsilon}
+% 	\right]
+% 	+
+% 	4 \eta_0^2(\sigma_\alpha^2\gamma\chi)^{-2}
+% 	S^{-1}
+% 	\sum_{j=1}^S
+% 	\sigma_\alpha^2
+% 	% \Var[\alpha_{0j}]
+% 	\Var\left[\frac{d\overline N_{j\setminus 0}}{d\varepsilon}\right]
+% 	\nonumber
+% 	\\
+% 	&
+% 	=
+% 	(\gamma\chi^{2}\sigma_\alpha^{2})^{-2}
+% 	S^{-2}
+% 	\sum_{j=1}^S \Var\left[
+% 		\left(\frac{d\overline{N}_{j\setminus0}}{d\varepsilon}\right)^2
+% 	\right]
+% 	+
+% 	4\eta_0^2(\sigma_\alpha \gamma\chi)^{-2}
+% 	S^{-1}
+% 	\sum_{j=1}
+% 	\Var\left[
+% 		\frac{d\overline N_{j\setminus 0}}{d\varepsilon}
+% 	\right]
+% \end{align}
+
+\newpage
+\section{Asymmetric Consumer-Resource Model (aCRM)}
+
+\subsection{Setup}
+
+The Asymmetric Consumer-Resource Model (aCRM) describes the dynamics of the populations $N_i$ of species $i \in \{1,\dots,S\}$ and abundances $R_\alpha$ of resources $\alpha \in \{1,\dots, M\}$ with the following coupled differential equations:
+\begin{align}
+	\frac{dN_i}{dt}
+	&=
+	N_i \left(
+		\sum_{\alpha=1}^M c_{i\alpha}R_\alpha - m_i
+	\right),
+	\\
+	\frac{dR_\alpha}{dt}
+	&=
+	R_\alpha \left(K_\alpha - R_\alpha\right)
+	-
+	\sum_{j=1}^S N_j e_{j\alpha}R_\alpha.
+\end{align}
+{\em Describe model parameters.}
+We will take the model parameters to be sampled from a normal distribution:
+\begin{gather}
+	K_\alpha = K + \sigma_K \delta K_\alpha,
+	\qquad
+	\delta K_\alpha \sim N(0,1),
+	\qquad
+	\eval{\delta K_\alpha \delta K_\beta} = \delta_{\alpha\beta}
+	\\
+	m_i = m + \sigma_m \delta m,
+	\qquad
+	\delta m_i \sim N(0,1),
+	\qquad
+	\eval{\delta m_i \delta m_j} = \delta_{ij}
+	\\
+	c_{i\alpha} = \frac{\mu_c}{M} + \frac{\sigma_c}{\sqrt{M}}d_{i\alpha},
+	\qquad
+	d_{i\alpha} \sim N(0,1),
+	\qquad
+	\eval{d_{i\alpha}d_{j\beta}} = \delta_{ij}\delta_{\alpha\beta}\\
+	e_{i\alpha}
+	=
+	\frac{\mu_e}{M}
+	+
+	\frac{\sigma_e}{\sqrt{M}}
+	\left(
+		\rho d_{i\alpha} + \sqrt{1-\rho^2} x_{i\alpha}
+	\right),
+	\qquad
+	x_{i\alpha}\sim N(0,1),
+	\qquad
+	\eval{x_{i\alpha}x_{j\beta}} 
+	=
+	\delta_{ij}\delta_{\alpha\beta},
+	\qquad
+	\eval{x_{i\alpha}d_{j\beta}} 
+	=
+	0
+\end{gather}
+Here, $0<\rho\leq 1$ is a mixture parameter; additionally, let $\gamma = M/S$.
+If we introduce the averages over one instantiation of the model,
+\begin{align}
+	\eval{R}
+	=
+	\frac{1}{M}\sum_{\alpha=1}^M R_\alpha,
+	\qquad
+	\eval{N}
+	=
+	\frac{1}{S}\sum_{i=1}^S N_i,
+\end{align}
+the aCRM differential equations become,
+\begin{align}
+	\frac{dN_i}{dt}
+	&=
+	N_i
+	\left(
+	g
+	+
+	\frac{\sigma_c}{\sqrt{M}}
+	\sum_{\alpha=1}^M 
+	d_{i\alpha}
+	R_\alpha
+	-
+	\sigma_m
+	\delta m_i
+	\right)
+	\\
+	\frac{dR_\alpha}{dt}
+	&=
+	R_\alpha
+	\left(
+		\kappa
+		% \frac{\mu_e}{M}
+		% \sum_{j=1}^{S}
+		% N_j
+		-
+		R_\alpha
+		-
+		\frac{\sigma_e}{\sqrt{M}}
+		\sum_{i=1}^{S}
+		N_i
+		\left(
+			\rho d_{i\alpha} + \sqrt{1-\rho^2} x_{i\alpha}
+		\right)
+		+ 
+		\sigma_K \delta K_\alpha
+	\right),
+\end{align}
+where,
+\begin{align}
+	g 
+	&\equiv
+	\mu_c \eval{R}
+	-
+	m,
+	\\
+	\kappa
+	&\equiv
+	K 
+	-
+	\mu_e \gamma^{-1} \eval{N}.
+\end{align}
+
+\subsection{Cavity solution}
+
+In order to analyze the behavior of the ecological model, we will assume that species and resources are replica-symmetric, meaning that averages over all species and/or resources in a single instantiation of the model are equivalent to ensemble averages over fluctuations in model parameters ($\delta K_\alpha, \delta m, d_{i\alpha}, x_{i\alpha}$) throughout many instantiations of the model.
+In order to produce self-consistency equations, we will use the cavity method in which we perturb the ecosystem by introducing an additional species $i = 0$ and resource $\alpha = 0$.
+The aCRM differential equations for species $i = 1,\dots,S$ become,
+\begin{align}
+	\frac{dN_i}{dt}
+	&=
+	N_i
+	\left(
+		\mu_c \eval{R} -
+		[m - \sigma_c M^{-1/2} d_{i0}R_0]
+		+
+		\sigma_c M^{-1/2} \sum_{\alpha=1}^M d_{i\alpha} R_\alpha
+		-
+		\sigma_m
+		\delta m_i
+	\right)
+	\label{aCRM-N-pert}
+	\\
+	\frac{dR_\alpha}{dt}
+	&=
+	R_\alpha
+	\left(
+		\left[
+			K 
+			-
+			\sigma_e M^{-1/2} N_0 \left(\rho d_{0\alpha} + \sqrt{1-\rho^2} x_{0\alpha}\right)
+		\right]
+		-
+		\mu_e \gamma^{-1}\eval{N}
+		-
+		R_\alpha
+	\right.
+	\nonumber
+		\\
+		&
+	\left.
+		\qquad-
+		\sigma_e M^{-1/2}
+		\sum_{i=1}^{S}
+		N_i
+		\left(
+			\rho d_{i\alpha}
+			+
+			\sqrt{1-\rho^2} x_{i\alpha}
+		\right)
+		+
+		\sigma_K \delta K_\alpha
+	\right),
+	\label{aCRM-R-pert}
+\end{align}
+and for species $i = 0$ and resource $\alpha = 0$, the differential equations become,
+\begin{align}
+	\frac{dN_0}{dt}
+	&=
+	N_0
+	\left(
+		g
+		+
+		M^{-1/2}\sigma_c 
+		\sum_{\alpha=1}^M
+		d_{0\alpha} R_\alpha
+		+
+		M^{-1/2}\sigma_c
+		d_{00}R_0
+		-
+		\sigma_m 
+		\delta m_0
+	\right)
+	\\
+	\frac{dR_0}{dt}
+	&=
+	R_0
+	\left(
+		\kappa
+		-
+		R_0
+		-
+		M^{-1/2}\sigma_e
+		\sum_{i=1}^{S}
+		N_j \left(
+			\rho d_{i0}
+			+
+			\sqrt{1-\rho^2}x_{i0}
+		\right)
+		-
+		M^{-1/2}
+		\sigma_e
+		N_0
+		\left(
+			\rho d_{00}
+			+
+			\sqrt{1-\rho^2}x_{00}
+		\right)
+		+
+		\sigma_K
+		\delta K_\alpha
+	\right).
+\end{align}
+We will analyze the steady-state behavior of this perturbed system, relative to the unperturbed system.
+A variable with a line on top represents a steady-state value, and a variable like $\overline N_{i \setminus 0}$ represents the steady-state quantity without the perturbation by species $i=0$ and resource $\alpha = 0$.
+Looking at the perturbed steady-state equations (eqs., \ref{aCRM-N-pert}, \ref{aCRM-R-pert}), we see that we can treat the presence of the additional species and resource as a perturbations to model parameters: $m_i \to m_i - \sigma_c M^{-1/2} d_{i0} \overline R_0$ and $K_\alpha \to K_\alpha - \sigma_e M^{-1/2} \overline N_0 \left(
+	\rho d_{0\alpha} + \sqrt{1-\rho^2} x_{0\alpha}
+\right)$.
+If $M$ is sufficiently large, we can model the perturbation to the original species and resources with linear response:
+\begin{align}
+	\overline N_i
+	&=
+	\overline N_{i\setminus 0}
+	-
+	\frac{\sigma_e}{\sqrt{M}}
+	\sum_{\beta = 1}^M
+	\chi_{i\beta}^{(N)}
+	 \left(
+		\rho d_{0\beta} + \sqrt{1-\rho^2} x_{0\beta}
+	\right)\overline N_0
+	-
+	\frac{\sigma_c}{\sqrt{M}}
+	\sum_{j=1}^S
+	\nu_{i j}^{(N)}
+	d_{j0}
+	\overline R_0
+	,
+	\\
+	\overline R_\alpha
+	&=
+	\overline R_{\alpha \setminus 0}
+	-
+	\frac{\sigma_e}{\sqrt{M}}
+	\sum_{\beta=1}^{M}
+	\chi_{\alpha\beta}^{(R)}
+	\left(
+		\rho d_{0\beta}
+		+
+		\sqrt{1-\rho^2} x_{0\beta}
+	\right)
+	\overline N_0
+	-
+	\frac{\sigma_c}{\sqrt{M}}
+	\sum_{j=1}^S
+	\nu_{\alpha j}^{(R)} d_{j0} \overline R_0
+	,
+\end{align}
+where we have defined the susceptibilities,
+\begin{align}
+	&
+	\chi_{i\beta}^{(N)}
+	\equiv
+	\frac{\partial \overline N_i}{\partial K_\beta},
+	% \qquad
+	&&
+	\chi_{\alpha\beta}^{(R)}
+	\equiv
+	\frac{\partial \overline R_\alpha}{\partial K_\beta},
+	\\
+	&
+	\nu_{ij}^{(N)}
+	\equiv
+	\frac{\partial\overline N_i}{\partial m_j},
+	% \\
+	&&
+	\nu_{\alpha j}^{(R)}
+	\equiv
+	\frac{\partial \overline R_\alpha}{\partial m_j}.
+\end{align}
+
+\subsubsection{Deriving the self-consistency equations for species populations}
+
+Substituting the linear response approximation for resources into the aCRM steady-state equation for the additional species give,
+\begin{align}
+	0
+	&=
+	\overline N_0
+	\left(
+		g
+		+
+		% \left[
+			\frac{\sigma_c }{\sqrt{M}}
+			\sum_{\alpha=1}^M
+			d_{0\alpha} 
+			\overline R_{\alpha \setminus 0}
+			-
+			\frac{\sigma_c \sigma_e}{M}
+			\sum_{\alpha,\beta=1}^M
+			% \sum_{\beta=1}^{M}
+			\chi_{\alpha\beta}^{(R)}
+			d_{0\alpha} 
+			\left(
+				\rho d_{0\beta}
+				+
+				\sqrt{1-\rho^2} x_{0\beta}
+			\right)
+			\overline N_0
+			\right.
+			\nonumber
+			\\
+			&\qquad\qquad
+			\left.
+			-
+			\frac{\sigma_c^2}{M}
+			% \frac{\sigma_c}{\sqrt{M}}
+			\sum_{\alpha=1}^M
+			\sum_{j=1}^S
+			\nu_{\alpha j}^{(R)}
+			d_{0\alpha} 
+			d_{j0}
+			\overline N_0
+		% \right]
+		+
+		\frac{\sigma_c}{\sqrt{M}}
+		d_{00}
+		\overline R_0
+		-
+		\sigma_m 
+		\delta m_0
+	\right).
+	\label{substituteSusceptN0}
+\end{align}
+The mean of the third term (involving $\chi_{\alpha\beta}^{(R)}$) is (excluding pre-factors),
+\begin{gather}
+	\eval{
+		\frac{\sigma_c\sigma_e}{M}
+		\sum_{\alpha,\beta=1}^M
+			\chi_{\alpha\beta}^{(R)}
+			d_{0\alpha} 
+			\left(
+				\rho d_{0\beta}
+				+
+				\sqrt{1-\rho^2} x_{0\beta}
+			\right)
+			\overline N_0
+	}
+	=
+	\overline N_0
+	\frac{\sigma_c\sigma_e}{M}
+	\sum_{\alpha,\beta=1}^M
+		\eval{\chi_{\alpha\beta}^{(R)}}
+		\left(
+			\rho 
+			\eval{
+			d_{0\alpha} 
+			d_{0\beta}
+			}
+			+
+			\eval{
+			d_{0\alpha} 
+			}
+			\eval{
+			x_{0\beta}
+			}
+			\sqrt{1-\rho^2}
+		\right)
+		\nonumber
+		\\
+	=
+	\overline N_0
+	\frac{\sigma_c\sigma_e}{M}
+	\sum_{\alpha,\beta=1}^M
+		\eval{\chi_{\alpha\beta}^{(R)}}
+		\left(
+			\rho 
+			\delta_{\alpha\beta}
+			+
+			0
+			\times 
+			0
+			\sqrt{1-\rho^2}
+		\right)
+	=
+	\overline N_0 \sigma_c\sigma_e \rho \chi,
+\end{gather}
+where we have defined $\chi 
+=
+M^{-1}\sum_{\alpha=1}^M\eval{\chi_{\alpha\alpha}^{(R)}}$ and used that $d_{0\alpha}$ and $x_{0\beta}$ are uncorrelated.
+The variance of this term is of order $O(M^{-1})$, which can be verified by expanding out the second moment.
+The mean of the fourth term is zero because $d_{0\alpha}$ and $d_{j0}$ are uncorrelated when $\alpha\geq 1, j \geq 1$; the variance of the fourth term is of order $O(M^{-1})$.
+Keeping only terms of order $O(M^{-1})$,
+\begin{align}
+	0 = \overline N_0
+	\left(
+		g 
+		-
+		\sigma_c \sigma_e \rho \chi \overline N_0
+		+
+		\frac{\sigma_c}{\sqrt{M}}
+		\sum_{\alpha = 1}^M d_{0\alpha} \overline R_{\alpha \setminus 0}
+		-
+		\sigma_m \delta m_0
+	\right)
+	+
+	O(M^{-1/2}).
+	\label{N0beforeconsist}
+\end{align}
+The last two terms above are a sum of many independent random variables, so, by the central limit theorem, we can model these terms as a sum of normal random variables.
+The mean of these terms is,
+\begin{align}
+	\eval{
+		\frac{\sigma_c}{\sqrt{M}}\sum_{\alpha=1}^M
+		d_{0\alpha} \overline R_{\alpha \setminus 0}
+		-
+		\sigma_m \delta m_0
+	}
+	=
+		\frac{\sigma_c}{\sqrt{M}}\sum_{\alpha=1}^M
+		\eval{d_{0\alpha}}\eval{ \overline R_{\alpha \setminus 0}}
+		-
+		\sigma_m \eval{\delta m_0}
+		=
+		\frac{\sigma_c}{\sqrt{M}}\sum_{\alpha=1}^M
+		0\times\eval{ \overline R_{\alpha \setminus 0}}
+		-
+		\sigma_m \times 0
+		=0.
+\end{align}
+The variance of these terms is,
+\begin{align}
+	\sigma_g^2
+	&\equiv
+	\Var{
+		\frac{\sigma_c}{\sqrt{M}}
+		\sum_{\alpha=1}^M d_{0\alpha} \overline R_{\alpha\setminus 0}
+		-
+		\sigma_m\delta m_0
+	}
+	=
+	\frac{\sigma_c^2}{M}
+	\sum_{\alpha=1}^M 
+	% d_{0\alpha} \overline R_{\alpha\setminus 0}
+	\left(
+		\eval{\overline R_{\alpha\setminus 0}}^2
+		\Var{d_{0\alpha}}
+		+
+		\Var{\overline R_{\alpha\setminus0}}
+		\Var{d_{0\alpha}}
+	\right)
+	+
+	\sigma_m^2
+	\Var{\delta m_0}
+	\nonumber
+	\\
+	&=
+	\frac{\sigma_c^2}{M}
+	\sum_{\alpha=1}^M 
+	% d_{0\alpha} \overline R_{\alpha\setminus 0}
+	\left(
+		\eval{\overline R_{\alpha\setminus 0}}^2
+		+
+		\eval{\overline R_{\alpha\setminus0}^2}
+		-
+		\eval{\overline R_{\alpha\setminus0}}^2
+	\right)
+	+
+	\sigma_m^2
+	=
+	\frac{\sigma_c^2}{M}
+	\sum_{\alpha=1}^{M}
+	\eval{\overline R_{\alpha\setminus 0}^2}
+	+
+	\sigma_m^2
+	=
+	\sigma_c^2 q_R + \sigma_m^2,
+\end{align}
+where we have defined,
+\begin{align}
+	q_R 
+	\equiv 
+	\frac{1}{M}
+	\sum_{\alpha = 1}^M
+	\eval{\overline R_{\alpha \setminus 0}^2}.
+\end{align}
+Let $Z_N\sim N(0,1)$ be a unit normal random variable so that the large-$M$ limit approximate steady-state condition for the perturbing species becomes,
+\begin{align}
+	0 = 
+	\overline N_0
+	\left(
+		g 
+		-
+		\sigma_c\sigma_e\rho\chi\overline N_0
+		+
+		\sigma_g Z_N
+	\right).
+\end{align}
+Solving for $\overline N_0$ and discarding non-physical solutions,
+\begin{align}
+	\mathcolorbox{
+	\overline N_0
+	=
+	\max\left\{
+		0,
+		\frac{g + \sigma_g Z_N}{\sigma_c \sigma_e \rho\chi}
+	\right\}
+	}
+	.
+	\label{N0selfconsist}
+\end{align}
+
+\subsubsection{Deriving the self-consistency equations for resource abundances}
+
+
+Now, we repeat this process to find a self-consistency equation for the resources.
+We substitute the linear response approximation for species into the aCRM steady-state equation for the additional resource:
+\begin{align}
+	0
+	&=
+	\overline R_0
+	\left(
+		\kappa
+		-
+		\overline R_0
+		-
+		\frac{\sigma_e}{\sqrt{M}}
+		\sum_{i=1}^{S}
+		\overline N_{i\setminus 0}
+		\left(
+			\rho d_{i0}
+			+
+			\sqrt{1-\rho^2}x_{i0}
+		\right)
+	\right.
+	\nonumber
+	\\
+	&\qquad
+	\left.
+		+
+		\frac{\sigma_e^2}{M}
+		\sum_{i=1}^{S}
+		\sum_{\beta = 1}^M
+		\chi_{i\beta}^{(N)}
+		\left(
+			\rho d_{i0}
+			+
+			\sqrt{1-\rho^2}x_{i0}
+		\right)
+		\left(
+			\rho d_{0\beta} + \sqrt{1-\rho^2} x_{0\beta}
+		\right)\overline N_0
+	\right.
+	\nonumber
+		\\
+		&\qquad
+	\left.
+		+
+		\frac{\sigma_e\sigma_c}{M}
+		\sum_{i,j=1}^{S}
+		\nu_{i j}^{(N)}
+		\left(
+			\rho d_{i0}
+			+
+			\sqrt{1-\rho^2}x_{i0}
+		\right)
+		d_{j0}
+		\overline R_0
+		-
+		\frac{\sigma_e}{\sqrt{M}}
+		\overline N_0
+		\left(
+			\rho d_{00}
+			+
+			\sqrt{1-\rho^2}x_{00}
+		\right)
+		+
+		\sigma_K
+		\delta K_\alpha
+	\right).
+	\label{substituteSusceptR0}
+\end{align}
+First, we observe that the fourth term (involving $\chi_{i\beta}^{(N)}$) has zero mean and variance of order $O(M^{-1})$; this can be seen by recalling that $d_{i0},d_{0\beta}, x_{i0},x_{0\beta}$ are all independent for $i,\alpha,\beta \geq 1$.
+Similarly, we see that the variance of the fifth term (involving $\nu_{ij}^{(N)}$) is of order $O(M^{-1})$.
+We will ignore fluctuations of order $O(M^{-1})$.
+The mean of the fifth term is,
+\begin{gather}
+	\eval{
+		\frac{\sigma_e \sigma_c}{M}
+		\sum_{i,j = 1}^S
+		\nu_{ij}^{(N)}
+		\left(
+			\rho d_{i0} + \sqrt{1-\rho^2} x_{i0}
+		\right)
+		d_{j0} \overline R_0
+	}
+	=
+	\overline R_0
+	\frac{\sigma_e \sigma_c}{M}
+	\sum_{i,j = 1}^S
+	\eval{
+		\nu_{ij}^{(N)}
+	}
+	\left(
+		\rho 
+		\eval{d_{i0} 
+		d_{j0} }
+		+ 
+		\sqrt{1-\rho^2} 
+		\eval{x_{i0}}
+		\eval{d_{j0} }
+	\right)
+	\nonumber
+	\\
+	=
+	\overline R_0
+	\sigma_e \sigma_c
+	\frac{S}{M}\frac{1}{S}
+	\sum_{i,j = 1}^S
+	\eval{
+		\nu_{ij}^{(N)}
+	}
+	\left(
+		\rho 
+		\delta_{ij}
+		+ 
+		\sqrt{1-\rho^2} 
+		\times 0 \times 0
+	\right)
+	=
+	\rho \sigma_e\sigma_c \gamma^{-1}\nu\overline R_0,
+\end{gather}
+where we have defined,
+\begin{align}
+	\nu
+	\equiv
+	\frac{1}{S}
+	\sum_{i=1}^S
+	\eval{\nu_{ii}^{(N)}}.
+\end{align}
+Keeping only terms of order $O(M^{-1})$,
+\begin{align}
+	0
+	=
+	\overline R_0
+	\left(
+		\kappa
+		-
+		\overline R_0
+		-
+		\frac{\sigma_e}{\sqrt{M}}
+		\sum_{i=1}^S\overline N_{i \setminus 0}
+		\left(
+			\rho d_{i0}
+			+
+			\sqrt{1-\rho^2}x_{i0}
+		\right)
+		+
+		\rho \sigma_e \sigma_c \gamma^{-1} \nu \overline R_0
+		+
+		\sigma_K \delta K_0
+	\right)
+	+
+	O(M^{-1/2}).
+	\label{Rbeforeconsist}
+\end{align}
+Now, we model the third and last terms as a sum of a large number of independent random variables, meaning we can apply the central limit theorem and model the sum of these terms as a normal random variables.
+Its mean is,
+\begin{align}
+	\eval{
+		\sigma_K \delta K_0
+		-
+		\frac{\sigma_e}{\sqrt{M}}
+		\sum_{i=1}^S
+		\overline N_{i\setminus0}
+		\left(
+			\rho d_{i0} + \sqrt{1-\rho^2} x_{i0}
+		\right)
+	}
+	&=
+	\sigma_K \eval{\delta K_0}
+	-
+	\frac{\sigma_e}{\sqrt{M}}
+	\sum_{i=1}^S
+	\eval{\overline N_{i\setminus0}}
+	\left(
+		\rho \eval{d_{i0}} + \sqrt{1-\rho^2} \eval{x_{i0}}
+	\right)
+	\nonumber
+	\\
+	&=
+	\sigma_K \times 0
+	-
+	\frac{\sigma_e}{\sqrt{M}}
+	\sum_{i=1}^S
+	\eval{\overline N_{i\setminus0}}
+	\left(
+		\rho \times 0 + \sqrt{1-\rho^2} \times 0
+	\right)
+	=
+	0.
+\end{align}
+The variance is,
+\begin{gather}
+	\sigma_\kappa^2 \equiv 
+	\Var{
+	\sigma_K \delta K_0
+	-
+	\frac{\sigma_e}{\sqrt{M}}
+	\sum_{i=1}^S
+	\overline N_{i\setminus0}
+	\left(
+		\rho d_{i0} + \sqrt{1-\rho^2} x_{i0}
+	\right)
+	}
+	=
+	\sigma_K^2 \Var{\delta K_0}
+	+
+	\frac{\sigma_e^2}{M}
+	\sum_{i=1}^S
+	\Var{\overline N_{i\setminus0}
+	\left(
+		\rho d_{i0} + \sqrt{1-\rho^2} x_{i0}
+	\right)}
+	\nonumber
+	\\
+	=
+	\sigma_K^2
+	+
+	\frac{\sigma_e^2}{M}
+	\sum_{i=1}^S
+	\left(
+	\eval{\overline N_{i\setminus0}}^2
+	\left(
+		\rho^2 \Var{d_{i0}} + (1-\rho^2 )\Var{x_{i0}}
+	\right)
+	+
+	0
+	\times \Var{\overline N_{i\setminus 0}}
+	+
+	\Var{\overline N_{i\setminus0}}
+	\left(
+		\rho^2 \Var{d_{i0}} + (1-\rho^2 )\Var{x_{i0}}
+	\right)
+	\right)
+	\nonumber
+	\\
+	=
+	\sigma_K^2
+	+
+	\frac{\sigma_e^2}{M}
+	\sum_{i=1}^S
+	\left(
+	\eval{\overline N_{i\setminus0}}^2
+	+
+	\Var{\overline N_{i\setminus0}}
+	\right)
+	=
+	\sigma_K^2
+	+
+	{\sigma_e^2}
+	\frac{S}{M}
+	\frac{1}{S}
+	\sum_{i=1}^S
+	\left(
+	\eval{\overline N_{i\setminus0}}^2
+	+
+	\eval{\overline N_{i\setminus0}^2}
+	-
+	\eval{\overline N_{i\setminus0}}^2
+	\right)
+	=
+	\sigma_K^2 
+	+
+	\gamma^{-1}\sigma_e^2
+	q_{N},
+	% \nonumber
+\end{gather}
+where,
+\begin{align}
+	q_N \equiv
+	\frac{1}{S}
+	\sum_{i=1}^S \eval{N_{i\setminus 1}^2}.
+\end{align}
+The approximate steady-state condition for the added resource then becomes,
+\begin{align}
+	0 = \overline R_0
+	\left(
+		\kappa - \overline R_0 + \sigma_\kappa Z_R + \rho \sigma_e \sigma_c \gamma^{-1} \nu \overline R_0
+	\right).
+	\label{R0selfconsist}
+\end{align}
+Sovling for $\overline R_0$ and discarding nonphysical solutions gives,
+\begin{align}
+	\mathcolorbox{
+	\overline R_0 
+	=
+	\max\left\{
+		0,
+		\frac{\kappa+ \sigma_\kappa Z_R}{1- \rho \sigma_e \sigma_c \gamma^{-1} \nu}
+	\right\}
+	}.
+\end{align}
+
+\subsubsection{Final self-consistency equations}
+
+Some essential quantities of interest are the expected fraction of surviving species $\phi_N$ and fraction of non-depleted resources $\phi_R$.
+These quantities are computed using the moments calculated in section \ref{rampNormal} and equations \ref{N0selfconsist} and \ref{R0selfconsist}:
+\begin{align}
+	&\mathcolorbox{\phi_N =
+	\eval{
+		\Theta(\overline N_0)
+	}
+	=
+	\Phi(\Delta_g),}
+	\label{phiNselfconsist}
+	\\
+	&\mathcolorbox{\phi_R = 
+	\eval{
+		\Theta(\overline R_0)
+	}
+	=
+	\Phi(\Delta_\kappa),}
+	\label{phiRselfconsist}
+\end{align}
+where $\mathcolorbox{\Delta_\kappa \equiv \kappa/\sigma_\kappa}$ and $\mathcolorbox{\Delta_g \equiv g/\sigma_g}$.
+Next, we can differentiate our expressions for $\overline N_0$ and $\overline R_0$ to get,
+\begin{align}
+	\nonumber
+	\frac{\partial \overline N_0}{\partial m}
+	&=
+	\frac{\partial}{\partial m}
+	\frac{g + \sigma_g Z_N}{\sigma_c \sigma_e \rho \chi}
+	\Theta \left(\overline N_0\right)
+	=
+	-
+	\frac{1}{\sigma_c \sigma_e \rho \chi}
+	\Theta(\overline N_0)
+	+
+	\left[\text{$\overline N_0 \delta(\overline N_0)$-term}\right]
+	\\
+	\implies
+	\eval{\frac{\partial \overline N_0}{\partial m}}
+	&=
+	\mathcolorbox{
+	\nu
+	=
+	% -\frac{\eval{\Theta(\overline N_0)}}{\sigma_c \sigma_e \rho \chi}
+	% +
+	% 0
+	% =
+	-\frac{\phi_N}{\sigma_c \sigma_e \rho \chi}}
+	\label{nuselfconsist}
+	\\
+	\nonumber
+	\frac{\partial \overline R_0}{\partial K}
+	&=
+	\frac{\partial }{\partial K}
+	\frac{\kappa + \sigma_\kappa Z_R}{1-\rho \sigma_e \sigma_c \gamma^{-1}\nu}
+	\Theta(\overline R_0)
+	=
+	\frac{1}{1-\rho \sigma_e \sigma_c \gamma^{-1}\nu}
+	\Theta(\overline R_0)
+	+
+	\left[\text{$\overline R_0 \delta(\overline R_0)$-term}\right]
+	\\
+	\implies
+	\eval{
+		\frac{\partial \overline R_0}{\partial K}
+	}
+	&=
+	\mathcolorbox{
+	\chi
+	=
+	% \frac{\eval{\Theta(\overline R_0)}}{1-\rho \sigma_e \sigma_c \gamma^{-1}\nu}
+	% +
+	% 0
+	% =
+	\frac{\phi_R}{1-\rho \sigma_e \sigma_c \gamma^{-1}\nu}
+	}.
+	\label{chiselfconsist}
+\end{align}
+We can solve these two equations for $\chi,\nu$ to obtain the relations,
+\begin{align}
+	\rho \sigma_c \sigma_e\nu = 
+	\left(
+		\gamma^{-1}-\phi_R/\phi_N
+	\right)^{-1},
+	\qquad
+	\chi =
+	\phi_R - \gamma^{-1}\phi_N.
+	\label{solvedSuscept}
+\end{align}
+Next, we use equations \ref{N0selfconsist} and \ref{R0selfconsist} and invoke our assumption of replica symmetry to find,
+\begin{align}
+	&
+	\label{Nselfconsist}
+	\mathcolorbox{
+	\eval{N}
+	=
+	\eval{
+		\overline N_0
+	}
+	=
+	\frac{\sigma_g}{\sigma_c\sigma_e\rho\chi}
+	W_1(\Delta_g,1)
+	=
+	\frac{\sigma_g}{\sigma_c\sigma_e\rho\chi}
+	\left(
+		\frac{e^{-\Delta_g^2/2}}{\sqrt{2\pi}}
+		+
+		\Delta_g \Phi(\Delta_g)
+	\right)},
+	\\
+	&
+	\label{Rselfconsist}
+	\mathcolorbox{\eval{R}
+	=
+	\eval{\overline R_0}
+	=
+	\frac{\sigma_\kappa}{1-\rho \sigma_e \sigma_c \gamma^{-1}\nu}
+	W_1(\Delta_\kappa,1)
+	=
+	\frac{\sigma_\kappa}{1-\rho \sigma_e \sigma_c \gamma^{-1}\nu}
+	\left(
+		\frac{e^{-\Delta_\kappa^2/2}}{\sqrt{2\pi}}
+		+
+		\Delta_\kappa \Phi(\Delta_\kappa)
+	\right)},
+	\\
+	&
+	\label{qNselfconsist}
+	\mathcolorbox{
+	q_N
+	=
+	\eval{\overline N_0^2}
+	=
+	\left(
+		\frac{\sigma_g}{\sigma_c\sigma_e\rho\chi}
+	\right)^2
+	W_2(\Delta_g,1)
+	=
+	\left(
+		\frac{\sigma_g}{\sigma_c\sigma_e\rho\chi}
+	\right)^2
+	\left(
+		\frac{\Delta e^{-\Delta^2/2}}{\sqrt{2\pi}}
+		+
+		(1+\Delta^2)
+		\Phi(\Delta)
+	\right)},
+	\\
+	&
+	\label{qRselfconsist}
+	\mathcolorbox{
+	q_R
+	=
+	\eval{\overline R_0^2}
+	=
+	\left(
+		\frac{\sigma_\kappa}{1-\rho \sigma_e \sigma_c \gamma^{-1}\nu}
+	\right)^2
+	W_2(\Delta_\kappa,1)
+	=
+	\left(
+		\frac{\sigma_\kappa}{1-\rho \sigma_e \sigma_c \gamma^{-1}\nu}
+	\right)^2
+	\left(
+		\frac{\Delta e^{-\Delta^2/2}}{\sqrt{2\pi}}
+		+
+		(1+\Delta^2)\Phi(\Delta)
+	\right)}.
+\end{align}
+Recall the substitutions we made earlier:
+\begin{align}
+	&\mathcolorbox{\gamma = M/S}
+	\\
+	&
+	\mathcolorbox{
+		g 
+	\equiv
+	\mu_c \eval{R}
+	-
+	m},
+	\\
+	&
+	\mathcolorbox{
+	\kappa
+	\equiv
+	K 
+	-
+	\mu_e \gamma^{-1} \eval{N}},
+	\\
+	&
+	\mathcolorbox{
+		\sigma_g
+		\equiv
+		\sqrt{\sigma_m^2 + \sigma_c^2 q_R}
+	},
+	\\
+	&
+	\mathcolorbox{
+		\sigma_\kappa \equiv
+		\sqrt{\sigma_K^2 + \gamma^{-1}\sigma_e^2 q_N}
+	},
+	\\
+	&
+	\mathcolorbox{
+		\Delta_\kappa \equiv \kappa/\sigma_\kappa
+	},
+	\\
+	&
+	\mathcolorbox{
+		\Delta_N \equiv g/\sigma_g
+	}.
+\end{align}
+We can solve for the variables $\phi_N, \phi_R, \nu, \chi, \eval{N}, \eval{R}, q_N, q_R$ using the self-consistency equations \ref{phiNselfconsist}, \ref{phiRselfconsist}, \ref{nuselfconsist}, \ref{chiselfconsist}, \ref{Nselfconsist}, \ref{Rselfconsist}, \ref{qNselfconsist}, \ref{qRselfconsist}.
+Analytically, this is intractable, so it is solved using non-linear least squares.
+
+\newpage
+
+\subsection{Stability analysis of the replica-symmetric solution}
+
+In order to analyze the stability of solutions, we will assume that a steady-state replica-symmetric solution is achieved.
+Then, we will perturb the solution by a small amount and analyze how the resource abundances and species populations change; if the solution diverges, we can conclude the replica symmetry ansatz is broken.
+
+We perturb non-depleted resource abundances by $\varepsilon\eta^{(R)}_\alpha$ and surviving species populations by $\varepsilon\eta^{(N)}_i$, where $\eta^{(R)}_\alpha$ and $\eta^{(N)}_i$ are independent unit normal random variables and $\varepsilon>0$ is small.
+% We perturb non-depleted resource abundances by $\varepsilon\eta^{(R)}_\alpha$ and surviving species populations by $\varepsilon\eta^{(N)}_i$, where $\eta^{(R)}_\alpha$ and $\eta^{(N)}_i$ are independent unit normal random {\em variates} and $\varepsilon>0$ is small.
+% This means that $\eta^{(N)}_i$, and $\eta_\alpha^{(R)}$ are deterministic but have $S^{-1}\sum_{i=1}^S \eta^{(N)}_i \to 0$, $M^{-1}\sum_{\alpha=1}^M \eta^{(R)}_\alpha \to 0$, $S^{-1}\sum_{i=1}^S \left(\eta^{(N)}_i\right)^2 \to 1$, $M^{-1}\sum_{\alpha=1}^M \left(\eta^{(R)}_\alpha \right)^2\to 1$, $S^{-2}\sum_{i,j,j\ne i}^S \eta^{(N)}_i \eta^{(N)}_j \to 0$, $M^{-2}\sum_{\alpha,\beta,\alpha \ne \beta}^M \eta^{(R)}_\alpha \eta^{(R)}_\beta\to 0$, for large $M,S$.
+From equations \ref{N0beforeconsist} and \ref{Rbeforeconsist}, for surviving species and non-depleted resources,
+\begin{gather}
+	\overline N_0^+
+	= 
+	\frac{1}{\sigma_c \sigma_e \rho \chi }
+	\left(
+	g 
+	+
+	\frac{\sigma_c}{\sqrt{M}}
+	\sum_{\alpha ,\overline R_\alpha>0} d_{0\alpha} \overline R_{\alpha \setminus 0}^+
+	-
+	\sigma_m \delta m_0
+	\right),
+	\\
+	\overline R_0^+
+	=
+	\frac{1}{1
+	-
+	\rho \sigma_e \sigma_c \gamma^{-1} \nu }
+	\left(
+	\kappa
+	-
+	\frac{\sigma_e}{\sqrt{M}}
+	\sum_{i,\overline N_i>0}
+	\overline N_{i \setminus 0}^+
+	\left(
+		\rho d_{i0}
+		+
+		\sqrt{1-\rho^2}x_{i0}
+	\right)
+	+
+	\sigma_K \delta K_0
+	\right).
+\end{gather}
+Applying the perturbation gives,
+\begin{align}
+	\overline N_0^+
+	&= 
+	\frac{1}{\sigma_c \sigma_e \rho \chi }
+	\left(
+	g 
+	+
+	\frac{\sigma_c}{\sqrt{M}}
+	\sum_{\alpha ,\overline R_\alpha>0} d_{0\alpha} \left(
+		\overline R_{\alpha \setminus 0}^+
+		+
+		\varepsilon \eta_{\alpha}^{(R)}
+	\right)
+	-
+	\sigma_m \delta m_0
+	\right),
+% \end{align}
+% \begin{align}
+	\\
+	\overline R_0^+
+	&=
+	\frac{1}{1
+	-
+	\rho \sigma_e \sigma_c \gamma^{-1} \nu }
+	\left(
+	\kappa
+	-
+	\frac{\sigma_e}{\sqrt{M}}
+	\sum_{i,\overline N_i>0}
+	\left(
+		\overline N_{i \setminus 0}^+
+		+
+		\varepsilon \eta_i^{(N)}
+	\right)
+	\left(
+		\rho d_{i0}
+		+
+		\sqrt{1-\rho^2}x_{i0}
+	\right)
+	+
+	\sigma_K \delta K_0
+	\right).
+\end{align}
+Differentiating with respect to $\varepsilon$ yields,
+\begin{align}
+	\frac{d\overline N_0^+}{d\varepsilon}
+	&= 
+	\frac{1}{ \sigma_e \rho \chi \sqrt{M}}
+	\sum_{\alpha ,\overline R_\alpha>0} d_{0\alpha} \left(
+		\frac{d\overline R_{\alpha \setminus 0}^+}{d\varepsilon}
+		+
+		\eta_{\alpha}^{(R)}
+	\right),
+% \end{align}
+% \begin{align}
+	\\
+	\frac{d\overline R_0^+}{d\varepsilon}
+	&=
+	\frac{{\sigma_e}/{\sqrt{M}}}{1
+	-
+	\rho \sigma_e \sigma_c \gamma^{-1} \nu }
+	\sum_{i,\overline N_i>0}
+	\left(
+		\overline N_{i \setminus 0}^+
+		+
+		\varepsilon \eta_i^{(N)}
+	\right)
+	\left(
+		\rho d_{i0}
+		+
+		\sqrt{1-\rho^2}x_{i0}
+	\right).
+\end{align}
+We then square these quantities:
+\begin{align}
+	\left[\frac{d\overline N_0^+}{d\varepsilon}\right]^2
+	&= 
+	\frac{1/M}{ (\sigma_e \rho \chi)^2 }
+	\sum_{\alpha,\beta ,\overline R_\alpha>0,\overline R_\beta>0}
+	d_{0\alpha} 
+	d_{0\beta} 
+	\left(
+		\frac{d\overline R_{\alpha \setminus 0}^+}{d\varepsilon}
+		+
+		\eta_{\alpha}^{(R)}
+	\right)
+	\left(
+		\frac{d\overline R_{\beta \setminus 0}^+}{d\varepsilon}
+		+
+		\eta_{\beta}^{(R)}
+	\right)
+	,
+% \end{align}
+% \begin{align}
+	\\
+	\left[
+		\frac{d\overline R_0^+}{d\varepsilon}
+	\right]^2
+	&=
+	\frac{\sigma_e^2/M}{
+		(1
+	-
+	\rho \sigma_e \sigma_c \gamma^{-1} \nu)^2 }
+	\sum_{i,j,\overline N_i>0,\overline N_j>0}
+	\left(
+		\frac{
+			d\overline N_{i \setminus 0}^+
+		}{d\varepsilon}
+		+
+		\eta_i^{(N)}
+	\right)
+	\left(
+		\frac{
+			d\overline N_{j \setminus 0}^+
+		}{d\varepsilon}
+		+
+		\eta_j^{(N)}
+	\right)
+	\\
+	\nonumber
+	&\hspace{5cm}
+	\times
+	\left(
+		\rho d_{i0}
+		+
+		\sqrt{1-\rho^2}x_{i0}
+	\right)
+	\left(
+		\rho d_{j0}
+		+
+		\sqrt{1-\rho^2}x_{j0}
+	\right)
+	.
+\end{align}
+Averaging over all sources of randomness and using
+$
+\eval{\left[\frac{dN_{0}}{d\varepsilon}\right]^2}=S^{-1}\sum_{i=1}^S \left[\frac{dN_{i\setminus 0}}{d\varepsilon}\right]^2
+$
+and
+$
+\eval{\left[\frac{dR_{0}}{d\varepsilon}\right]^2}=M^{-1}\sum_{\alpha=1}^M \left[\frac{dR_{\alpha\setminus 0}}{d\varepsilon}\right]^2
+$,
+which follows from the replica symmetry ansatz, gives us:
+\begin{align}
+	\eval{
+	\left[\frac{d\overline N_0^+}{d\varepsilon}\right]^2
+	}
+	&= 
+	\frac{1/M}{ (\sigma_e \rho \chi)^2 }
+	\sum_{\alpha,\beta ,\overline R_\alpha>0,\overline R_\beta>0}
+	\eval{
+	d_{0\alpha} 
+	d_{0\beta}
+	}
+	\left(
+		\eval{
+			\frac{d\overline R_{\alpha \setminus 0}^+}{d\varepsilon}
+		\frac{d\overline R_{\beta \setminus 0}^+}{d\varepsilon}
+		}
+		+
+		\eval{\frac{d\overline R_{\alpha \setminus 0}^+}{d\varepsilon}}
+		\eval{\eta_{\beta}^{(R)}}
+		\right.
+		\\
+		\nonumber
+		&
+		\hspace{6cm}
+		\left.
+		+
+		\eval{\eta_{\alpha}^{(R)}}
+		\eval{\frac{d\overline R_{\beta \setminus 0}^+}{d\varepsilon}}
+		+
+		\eval{
+		\eta_{\alpha}^{(R)}
+		\eta_{\beta}^{(R)}}
+	\right)
+	\\
+	&=
+	\frac{1/M}{ (\sigma_e \rho \chi)^2 }
+	\sum_{\alpha,\beta,\overline R_\alpha,\overline R_\beta>0}
+	\delta_{\alpha\beta}
+	\left(
+		\eval{
+				\frac{d\overline R_\alpha\setminus}{d\varepsilon}
+				\frac{d\overline R_{\beta\setminus0}}{d\varepsilon}
+		}
+		+
+		\delta_{\alpha\beta}
+	\right)
+	\nonumber
+	\\
+	&=
+	\frac{\phi_R}{ (\sigma_e \rho \chi)^2 }
+	% \sum_{\alpha,\beta,\overline R_\alpha,\overline R_\beta>0}
+	% \delta_{\alpha\beta}
+	\left(
+		\eval{
+			\left[
+				\frac{d\overline R_{0}^+}{d\varepsilon}
+			\right]^2
+				% \frac{d\overline R_\alpha\setminus}{d\varepsilon}
+				% \frac{d\overline R_\beta\setminus}{d\varepsilon}
+		}
+		+
+		1
+		% \delta_{\alpha\beta}
+	\right)
+	,
+\end{align}
+\begin{align}
+	% \\
+	\eval{
+	\left[
+		\frac{d\overline R_0^+}{d\varepsilon}
+	\right]^2
+	}
+	&=
+	\frac{\sigma_e^2/M}{
+		(1
+	-
+	\rho \sigma_e \sigma_c \gamma^{-1} \nu)^2 }
+	\sum_{i,j,\overline N_i>0,\overline N_j>0}
+	\left(
+		\eval{
+		\frac{
+			d\overline N_{i \setminus 0}^+
+		}{d\varepsilon}
+		\frac{
+			d\overline N_{j \setminus 0}^+
+		}{d\varepsilon}
+		}
+		+
+		\eval{
+		\frac{
+			d\overline N_{i \setminus 0}^+
+		}{d\varepsilon}
+		}
+		\eval{\eta_j^{(N)}}
+	\right.
+		\\
+		\nonumber
+		&\hspace{0.4cm}
+	\left.
+		+
+		\eval{\eta_i^{(N)}}
+		\eval{
+		\frac{
+			d\overline N_{j \setminus 0}^+
+		}{d\varepsilon}
+		}
+		+
+		\eval{
+		\eta_i^{(N)}
+		\eta_j^{(N)}
+		}
+	\right)
+	% \\
+	% \nonumber
+	% &\hspace{4cm}
+	% \times
+	\left(
+		\rho^2 
+		\eval{
+		% \rho
+		d_{i0}
+		d_{j0}}
+		+
+		\rho
+		\sqrt{1-\rho^2}
+		\left(
+		\eval{d_{i0}}
+		\eval{x_{j0}}
+		+
+		% \rho 
+		% \sqrt{1-\rho^2}
+		\eval{x_{i0}}
+		\eval{d_{j0}}
+		\right)
+		+
+		(1-\rho^2)
+		x_{i0}
+		x_{j0}
+	\right)
+	\\
+	\nonumber
+	&=
+	\frac{\sigma_e^2(S/M)/S}{(1-\rho\sigma_e\sigma_c\gamma^{-1}\nu)^2}
+	\sum_{i,j,\overline N_i>0,\overline N_j>0}
+	\left(
+		\eval{
+			\frac{d\overline N_{i\setminus0}^+}{d\varepsilon}
+			\frac{d\overline N_{j\setminus0}^+}{d\varepsilon}
+		}
+		+
+		\delta_{ij}
+	\right)
+	\left(
+		\rho^2 \delta_{ij}
+		+
+		(1-\rho^2)\delta_{ij}
+	\right)
+	\\
+	% \nonumber
+	&=
+	\frac{\sigma_e^2\gamma^{-1} \phi_N}{(1-\rho\sigma_e\sigma_c\gamma^{-1}\nu)^2}
+	% \sum_{i,j,\overline N_i>0,\overline N_j>0}
+	\left(
+		\eval{
+			\left[
+				\frac{d\overline N_0^+}{d\varepsilon}
+			\right]^2
+			% \frac{d\overline N_{i\setminus0}^+}{d\varepsilon}
+			% \frac{d\overline N_{j\setminus0}^+}{d\varepsilon}
+		}
+		+
+		1
+	\right)
+	% \left(
+	% 	\rho^2 \delta_{ij}
+	% 	+
+	% 	(1-\rho^2)\delta_{ij}
+	% \right)
+	.
+\end{align}
+We can solve this system of equations to obtain:
+\begin{align}
+	&
+	\mathcolorbox{\eval{
+		\left[
+			\frac{d\overline N_0^+}{d\varepsilon}
+		\right]^2
+	}
+	=
+	\frac{
+		\phi_R \left(
+			(1-\nu\rho\sigma_c\sigma_e
+			\gamma^{-1})^2
+			\sigma_e^{-2}
+			+
+			\gamma^{-1}\phi_N
+		\right)
+	}{
+		\left[
+			\rho\chi\left(
+				1-\nu \rho \sigma_c \sigma_e\gamma^{-1}
+			\right)
+		\right]^2
+		-\gamma^{-1}\phi_N\phi_R
+	}},
+	\\
+	&
+	\mathcolorbox{
+	\eval{
+		\left[
+			\frac{d\overline R_0^+}{d\varepsilon}
+		\right]^2
+	}
+	=
+	\frac{
+		\gamma^{-1}\phi_N\left(
+			\phi_R+(\rho\sigma_e\chi)^2
+		\right)
+	}{
+		\left[
+			\rho\chi\left(
+				1-\nu \rho \sigma_c \sigma_e\gamma^{-1}
+			\right)
+		\right]^2
+		-\gamma^{-1}\phi_N\phi_R
+	}}.
+\end{align}
+By analyzing when these quantities diverge, we can conclude that the replica symmetry ansatz is broken when all parameters satisfy the self-consistency equations (\ref{phiNselfconsist}, \ref{phiRselfconsist}, \ref{nuselfconsist}, \ref{chiselfconsist}, \ref{Nselfconsist}, \ref{Rselfconsist}, \ref{qNselfconsist}, \ref{qRselfconsist}) and:
+\begin{align}
+	% \mathcolorbox{
+		0=\left[
+		\rho^\star\chi^\star\left(
+			1-\nu^\star \rho^\star \sigma_c \sigma_e\gamma^{-1}
+		\right)
+	\right]^2
+	-\gamma^{-1}\phi_N^\star\phi_R^\star
+	% }
+	.
+\end{align}
+Using the relations from line \ref{solvedSuscept}, we can re-write this as,
+\begin{align}
+	\phi_R\left(
+		(\rho^\star)^2\phi_R^\star-\gamma^{-1}\phi_N^\star
+	\right)
+	=0
+	\implies
+	\mathcolorbox{
+	\rho^\star
+	=
+	\sqrt{\gamma^{-1}\frac{\phi_N^\star}{\phi_R^\star}}
+	}
+	=
+	\sqrt{\frac{\text{\# survivng species}}{\text{\# non-depleted resources}}}.
+\end{align}
+
+% \begin{align}
+% 	\overline N_0^+
+% 	= 
+% 	% \overline N_0
+% 	\frac{1}{\sigma_c \sigma_e \rho \chi }
+% 	\left(
+% 	g 
+% 	+
+% 	\frac{\sigma_c}{\sqrt{M}}
+% 	\sum_{\alpha,\overline N_\alpha>0} d_{0\alpha} \overline R_{\alpha \setminus 0}^+
+% 	-
+% 	\sigma_m \delta m_0
+% 	\right)
+% 	% +
+% 	% O(M^{-1/2})
+% \end{align}
+% \begin{align}
+% 	% 0
+% 	\overline R_0^+
+% 	=
+% 	% \overline R_0
+% 	% \left(
+% 		\kappa
+% 		-
+% 		\frac{\sigma_e}{\sqrt{M}}
+% 		\sum_{i,\overline N_i >0}\overline N_{i \setminus 0}^+
+% 		\left(
+% 			\rho d_{i0}
+% 			+
+% 			\sqrt{1-\rho^2}x_{i0}
+% 		\right)
+% 		+
+% 		\rho \sigma_e \sigma_c \gamma^{-1} \nu \overline R_0^+
+% 		+
+% 		\sigma_K \delta K_0
+% 	% \right)
+% 	% +
+% 	% O(M^{-1/2}).
+% 	% \label{Rbeforeconsist}
+% \end{align}
+% Applying the perturbation then differentiating with respect to $\varepsilon$ yields,
+% \begin{align}
+% 	\frac{d\overline N_0^+}{d\varepsilon}
+% 	= 
+% 	% \overline N_0
+% 	\frac{1}{ \sigma_e \rho \chi \sqrt{M}}
+% 	% \left(
+% 	% \frac{\sigma_c}{\sqrt{M}}
+% 	\sum_{\alpha ,\overline N_\alpha>0} d_{0\alpha} 
+% 	\left(\frac{d\overline R_{\alpha \setminus 0}^+}{d\varepsilon}
+% 	+
+% 	% \frac{\sigma_c}{\sqrt{M}}
+% 	% \sum_{\alpha = 1}^M d_{0\alpha}
+% 	 \eta_\alpha^{(R)}
+% 	 \right)
+% 	% \right)
+% 	% +
+% 	% O(M^{-1/2})
+% \end{align}
+% \begin{align}
+% 	% 0
+% 	\frac{d\overline R_0^+}{d\varepsilon}
+% 	=
+% 	% \overline R_0
+% 	% \left(
+% 		% \kappa
+% 		-
+% 		\frac{\sigma_e}{\sqrt{M}}
+% 		\sum_{i,\overline N_i>0}
+% 		\left(
+% 			\frac{d\overline N_{i \setminus 0}^+}{d\varepsilon}
+% 			+
+% 			% \varepsilon
+% 			\eta_i^{(N)}
+% 		\right)
+% 		\left(
+% 			\rho d_{i0}
+% 			+
+% 			\sqrt{1-\rho^2}x_{i0}
+% 		\right)
+% 		+
+% 		\rho \sigma_e \sigma_c \gamma^{-1} \nu 
+% 		\left(
+% 		\frac{d\overline R_0^+ }{d\varepsilon}
+% 		+ 
+% 		\eta_0^{(R)}
+% 		\right)
+% 		% +
+% 		% \sigma_K \delta K_0
+% 	% \right)
+% 	% +
+% 	% O(M^{-1/2}).
+% 	% \label{Rbeforeconsist}
+% \end{align}
+% We then compute,
+% \begin{align}
+% 	\left(\frac{d\overline N_0^+}{d\varepsilon}\right)^2
+% 	= 
+% 	\frac{1}{ \sigma_e^2 \rho^2 \chi^2 M}
+% 	\sum_{\alpha,\beta,\overline N_\alpha>0,\overline{N}_\beta>0}
+% 	% \sum_{\beta = 1}^M 
+% 	d_{0\alpha} 
+% 	d_{0\beta} 
+% 	\left(
+% 	\frac{d\overline R_{\alpha \setminus 0}^+}{d\varepsilon}
+% 	\frac{d\overline R_{\beta \setminus 0}^+}{d\varepsilon}
+% 	+
+% 	\eta_\beta^{(R)}
+% 	\frac{d\overline R_{\alpha \setminus 0}^+}{d\varepsilon}
+% 	+
+% 	\eta_\alpha^{(R)}
+% 	\frac{d\overline R_{\beta \setminus 0}^+}{d\varepsilon}
+% 	+
+% 	\eta_\alpha^{(R)}
+% 	\eta_\beta^{(R)}
+% 	\right)
+% \end{align}
+% \begin{align}
+% 	&\left(\frac{d\overline R_0^+}{d\varepsilon}\right)^2
+% 	=
+% 	\frac{\sigma_e^2}{M}
+% 	\sum_{i,j,\overline N_i >0,\overline N_j>0}
+% 	\left(
+% 		\rho ^2
+% 		d_{i0}
+% 		d_{j0}
+% 		+
+% 		\rho
+% 		\sqrt{1-\rho^2}
+% 		(
+% 			d_{i0}
+% 			x_{j0}
+% 			+
+% 			d_{j0}
+% 			x_{i0}
+% 		)
+% 		+
+% 		(1-\rho^2)
+% 		x_{i0}
+% 		x_{j0}
+% 	\right)
+% 	\\
+% 	&
+% 	\quad \times \nonumber
+% 	\left(
+% 		\frac{d\overline N_{i \setminus 0}^+}{d\varepsilon}
+% 		\frac{d\overline N_{j \setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\eta_j^{(N)}
+% 		\frac{d\overline N_{i \setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\eta_i^{(N)}
+% 		\frac{d\overline N_{j \setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\eta_i^{(N)}
+% 		\eta_j^{(N)}
+% 	\right)
+% 	\\
+% 	&
+% 	\quad \nonumber
+% 	-
+% 	\frac{ 2\rho \sigma_e ^2\sigma_c \gamma^{-1} \nu }{\sqrt{M}}
+% 	\sum_{i,\overline N_i>0}
+% 	\left(
+% 		\rho d_{i0}
+% 		+
+% 		\sqrt{1-\rho^2}x_{i0}
+% 	\right)
+% 	\left(
+% 		\frac{d\overline R_0^+ }{d\varepsilon}
+% 		\frac{d\overline N_{i \setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\eta_i^{(N)}
+% 		\frac{d\overline R_0^+ }{d\varepsilon}
+% 		+ 
+% 		\eta_0^{(R)}
+% 		\frac{d\overline N_{i \setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\eta_0^{(R)}
+% 		\eta_i^{(N)}
+% 	\right)
+% 	\\
+% 	&\quad\nonumber
+% 	+
+% 	(\rho \sigma_e \sigma_c \gamma^{-1} \nu )^2
+% 	\left(
+% 		\left(\frac{d\overline R_0^+ }{d\varepsilon}\right)^2
+% 		+ 
+% 		2\eta_0^{(R)}
+% 		\frac{d\overline R_0^+ }{d\varepsilon}
+% 		+ 
+% 		\left(\eta_0^{(R)}\right)^2
+% 	\right)
+% \end{align}
+% Averaging over all sources of randomness (fluctuations in model parameters over multiple instantiations and fluctuations in the perturbations):
+
+% \begin{align}
+% 	\eval{\left(\frac{d\overline N_0^+}{d\varepsilon}\right)^2}
+% 	&= \nonumber
+% 	\frac{1}{ \sigma_e^2 \rho^2 \chi^2 M}
+% 	\sum_{\alpha,\beta ,\overline N_\alpha>0,\overline N_\beta>0} 
+% 	\delta_{\alpha\beta}
+% 	\left(
+% 	\eval{
+% 	\frac{d\overline R_{\alpha \setminus 0}^+}{d\varepsilon}
+% 	\frac{d\overline R_{\beta \setminus 0}^+}{d\varepsilon}
+% 	}
+% 	+
+% 	0
+% 	+
+% 	0
+% 	+
+% 	\delta_{\alpha\beta}
+% 	\right)
+% 	\\
+% 	&=
+% 	\frac{1}{ \sigma_e^2 \rho^2 \chi^2 M}
+% 	\sum_{\alpha,\overline N_\alpha>0}
+% 	\left(
+% 	\eval{
+% 		\left(
+% 		\frac{d\overline R_{\alpha \setminus 0}^+}{d\varepsilon}
+% 		\right)^2
+% 	}
+% 	+
+% 	1
+% 	\right)
+% 	=
+% 	\frac{\phi_R}{ \sigma_e^2 \rho^2 \chi^2}
+% 	\left(
+% 		\eval{
+% 			\left(
+% 			\frac{d\overline R_{0}^+}{d\varepsilon}
+% 			\right)^2
+% 		}
+% 		+
+% 		1
+% 	\right).
+% \end{align}
+
+% \begin{align}
+% 	&
+% 	\eval{\left(\frac{d\overline R_0^+}{d\varepsilon}\right)^2}
+% 	=
+% 	\nonumber
+% 	\frac{\sigma_e^2}{M}
+% 	\sum_{i,j,\overline N_i>0,\overline N_j>0}^S
+% 	\left(
+% 		\rho ^2
+% 		\delta_{ij}
+% 		% d_{i0}
+% 		% d_{j0}
+% 		+
+% 		\rho
+% 		\sqrt{1-\rho^2}
+% 		(
+% 			% d_{i0}
+% 			% x_{j0}
+% 			0
+% 			+
+% 			0
+% 			% d_{j0}
+% 			% x_{i0}
+% 		)
+% 		+
+% 		(1-\rho^2)
+% 		\delta_{ij}
+% 	\right)
+% 	% \\
+% 	% &
+% 	% \quad \times \nonumber
+% 	\left(
+% 		\eval{
+% 		\frac{d\overline N_{i \setminus 0}^+}{d\varepsilon}
+% 		\frac{d\overline N_{j \setminus 0}^+}{d\varepsilon}
+% 		}
+% 		+
+% 		0
+% 		% \eta_j^{(N)}
+% 		% \frac{d\overline N_{i \setminus 0}^+}{d\varepsilon}
+% 		+
+% 		0
+% 		% \eta_i^{(N)}
+% 		% \frac{d\overline N_{j \setminus 0}^+}{d\varepsilon}
+% 		+
+% 		\delta_{ij}
+% 		% \eta_i^{(N)}
+% 		% \eta_j^{(N)}
+% 	\right)
+% 	\\
+% 	&
+% 	\quad \nonumber
+% 	-
+% 	\frac{ 2\rho \sigma_e ^2\sigma_c \gamma^{-1} \nu }{\sqrt{M}}
+% 	\sum_{i,\overline N_i>0}
+% 	\left(
+% 		% \rho d_{i0}
+% 		0
+% 		+
+% 		% \sqrt{1-\rho^2}x_{i0}
+% 		0
+% 	\right)
+% 	\left(
+% 		\eval{
+% 		\frac{d\overline R_0^+ }{d\varepsilon}
+% 		\frac{d\overline N_{i \setminus 0}^+}{d\varepsilon}
+% 		}
+% 		+
+% 		0
+% 		% \eta_i^{(N)}
+% 		% \frac{d\overline R_0^+ }{d\varepsilon}
+% 		+ 
+% 		0
+% 		% \eta_0^{(R)}
+% 		% \frac{d\overline N_{i \setminus 0}^+}{d\varepsilon}
+% 		+
+% 		0
+% 		% \eta_0^{(R)}
+% 		% \eta_i^{(N)}
+% 	\right)
+% 	% \\
+% 	% &\quad\nonumber
+% 	+
+% 	(\rho \sigma_e \sigma_c \gamma^{-1} \nu )^2
+% 	\left(
+% 		\eval{
+% 		\left(\frac{d\overline R_0^+ }{d\varepsilon}\right)^2
+% 		}
+% 		+ 
+% 		0
+% 		% 2\eta_0^{(R)}
+% 		% \frac{d\overline R_0^+ }{d\varepsilon}
+% 		+ 
+% 		1
+% 	\right)
+% 	\\
+% 	&\quad 
+% 	\nonumber
+% 	= 
+% 	\frac{\sigma_e^2\gamma^{-1}}{S}
+% 	\sum_{i,\overline N_i>0}
+% 	% \left(
+% 	% 	\rho ^2
+% 	% 	% \delta_{ij}
+% 	% 	% d_{i0}
+% 	% 	% d_{j0}
+% 	% 	% +
+% 	% 	% \rho
+% 	% 	% \sqrt{1-\rho^2}
+% 	% 	% (
+% 	% 	% 	% d_{i0}
+% 	% 	% 	% x_{j0}
+% 	% 	% 	0
+% 	% 	% 	+
+% 	% 	% 	0
+% 	% 	% 	% d_{j0}
+% 	% 	% 	% x_{i0}
+% 	% 	% )
+% 	% 	+
+% 	% 	(1-\rho^2)
+% 	% 	% \delta_{ij}
+% 	% \right)
+% 	% \\
+% 	% &
+% 	% \quad \times \nonumber
+% 	\left(
+% 		\eval{
+% 			\left(
+% 		\frac{d\overline N_{i \setminus 0}^+}{d\varepsilon}
+% 		\right)^2
+% 		% \frac{d\overline N_{j \setminus 0}^+}{d\varepsilon}
+% 		}
+% 		% +
+% 		% 0
+% 		% % \eta_j^{(N)}
+% 		% % \frac{d\overline N_{i \setminus 0}^+}{d\varepsilon}
+% 		% +
+% 		% 0
+% 		% \eta_i^{(N)}
+% 		% \frac{d\overline N_{j \setminus 0}^+}{d\varepsilon}
+% 		+
+% 		1
+% 		% \delta_{ij}
+% 		% \eta_i^{(N)}
+% 		% \eta_j^{(N)}
+% 	\right)
+% 	% \\
+% 	% &
+% 	% \quad \nonumber
+% 	% \\
+% 	% &\quad\nonumber
+% 	+
+% 	(\rho \sigma_e \sigma_c \gamma^{-1} \nu )^2
+% 	\left(
+% 		\eval{
+% 		\left(\frac{d\overline R_0^+ }{d\varepsilon}\right)^2
+% 		}
+% 		% + 
+% 		% 0
+% 		% 2\eta_0^{(R)}
+% 		% \frac{d\overline R_0^+ }{d\varepsilon}
+% 		+ 
+% 		1
+% 	\right)
+% 	\\
+% 	&
+% 	\quad
+% 	\nonumber
+% 	=
+% 	\gamma^{-1}
+% 	\phi_N
+% 	\sigma_e^2
+% 	\left(
+% 		\eval{
+% 			\left(
+% 				\frac{d\overline N_0^+}{d\varepsilon}
+% 			\right)^2
+% 		}
+% 		+
+% 		1
+% 	\right)
+% 	+
+% 	(\rho \sigma_e \sigma_c \gamma^{-1} \nu)^2
+% 	\left(
+% 		\eval{
+% 		\left(\frac{d\overline R_0^+ }{d\varepsilon}\right)^2
+% 		}
+% 		+ 
+% 		1
+% 	\right)
+% \end{align}
+% Solving this system of equations gives,
+% \begin{align}
+% 	\eval{
+% 		\left(
+% 			\frac{d\overline R_0^+}{d\varepsilon}
+% 		\right)^2
+% 	}
+% 	&=
+% 	\frac{
+% 		\gamma^{-1}\phi_N \phi_R + \rho^2 \chi^2 \left(
+% 		(\phi_N \chi^{-1} \gamma^{-1})^2 + \gamma^{-1}\phi_N \sigma_e^2
+% 	\right)
+% 	}{
+% 		\rho^2 \chi^2 \left(1 - (\phi_N\chi^{-1}\gamma^{-1})^2\right)
+% 		-
+% 		\gamma^{-1}\phi_N \phi_R
+% 	}
+% 	% \frac{
+% 	% 	1+\rho^2 \left(
+% 	% 	(\phi_R - \chi)^2 + (\sigma_e \chi)^2
+% 	% \right)
+% 	% }{
+% 	% 	\rho^2 \phi_R (2\chi - \phi_R) - 1
+% 	% }
+% 	\\
+% 	\eval{
+% 		\left(
+% 			\frac{d\overline N_0^+}{d\varepsilon}
+% 		\right)^2
+% 	}
+% 	&=
+% 	\frac{
+% 		(\sigma_e^{-2} + \phi_N \gamma^{-1})\phi_R
+% 	}{
+% 		\rho^2 \chi^2 \left(1 - (\phi_N\chi^{-1}\gamma^{-1})^2\right)
+% 		-
+% 		\gamma^{-1}\phi_N \phi_R
+% 	}
+% 	% \frac{
+% 	% 	1+\sigma_e^{-2}
+% 	% }{
+% 	% 	\rho^2 \phi_R (2\chi - \phi_R) - 1
+% 	% },
+% \end{align}
+% where we have used $\rho \sigma_e \sigma_c \nu = - \phi_N / \chi$.
+% By analyzing when these quantities diverge, we can conclude that the replica symmetry ansatz is broken when all parameters satisfy the self-consistency equations (\ref{phiNselfconsist}, \ref{phiRselfconsist}, \ref{nuselfconsist}, \ref{chiselfconsist}, \ref{Nselfconsist}, \ref{Rselfconsist}, \ref{qNselfconsist}, \ref{qRselfconsist}) and:
+% \begin{align}
+% 	\mathcolorbox{
+% 		\rho^2 \chi^2 \left(1 - (\phi_N\chi^{-1}\gamma^{-1})^2\right)
+% 		-
+% 		\gamma^{-1}\phi_N \phi_R
+% 		=
+% 		0
+% 		% \rho^2 \phi_R (2\chi - \phi_R) = 1
+% 	}.
+% \end{align}
+% Equivalently,
+% \begin{align}
+% 	% \phi_R
+% 	% \left(
+% 		\rho^2 \phi_R - (1+2\rho^2)\gamma^{-1}\phi_N
+% 	% \right)
+% 	=
+% 	0
+% 	\implies
+% 	\rho=
+% 	(\gamma \phi_R / \phi_N -2)^{-1/2},
+% \end{align}
+% where we have used $\chi=\phi_R - \gamma^{-1}\phi_N$.
+% In the self-consistency equations, there are 8 unknown variables and 8 independent equations, so by requiring this last equation to be satisfied and having all but one parameter fixed, we can solve to find the value of the unfixed parameter which represents the critical point at which the replica symmetric ansatz is broken.
+
+
+
+
+% \newpage
+% \begin{align}
+% 	0
+% 	&=
+% 	% \overline R_0
+% 	% \left(
+% 		\kappa
+% 		+
+% 		\left(
+% 		\frac{\sigma_e\sigma_c}{M}
+% 		\sum_{i,j=1}^{S}
+% 		\nu_{i j}^{(N)}
+% 		\left(
+% 			\rho d_{i0}
+% 			+
+% 			\sqrt{1-\rho^2}x_{i0}
+% 		\right)
+% 		d_{j0}-1\right)
+% 		(\overline R_0 +\varepsilon \eta_0^{(R)})
+% 	% \right.
+% 	\nonumber
+% 	\\
+% 	&\qquad
+% 	% \left.
+% 		+
+% 		\left(
+% 		\frac{\sigma_e^2}{M}
+% 		\sum_{i=1}^{S}
+% 		\sum_{\beta = 1}^M
+% 		\chi_{i\beta}^{(N)}
+% 		\left(
+% 			\rho d_{i0}
+% 			+
+% 			\sqrt{1-\rho^2}x_{i0}
+% 		\right)
+% 		\left(
+% 			\rho d_{0\beta} + \sqrt{1-\rho^2} x_{0\beta}
+% 		\right)
+% 		% \overline N_0
+% 		-
+% 		\frac{\sigma_e}{\sqrt{M}}
+% 		\left(
+% 			\rho d_{00}
+% 			+
+% 			\sqrt{1-\rho^2}x_{00}
+% 		\right)
+% 		\right)
+% 		(\overline N_0^+ + \varepsilon \eta_i^{(N)})
+% 	% \right.
+% 	\nonumber
+% 		\\
+% 		&\qquad
+% 	% \left.
+% 		% +
+% 		% \frac{\sigma_e\sigma_c}{M}
+% 		% \sum_{i,j=1}^{S}
+% 		% \nu_{i j}^{(N)}
+% 		% \left(
+% 		% 	\rho d_{i0}
+% 		% 	+
+% 		% 	\sqrt{1-\rho^2}x_{i0}
+% 		% \right)
+% 		% d_{j0}
+% 		% \overline R_0
+% 		-
+% 		\frac{\sigma_e}{\sqrt{M}}
+% 		\sum_{i=1}^{S}
+% 		\left(
+% 			\rho d_{i0}
+% 			+
+% 			\sqrt{1-\rho^2}x_{i0}
+% 		\right)
+% 		(\overline N_{i\setminus 0} + \varepsilon \eta_{i}^{(N)})
+% 		+
+% 		\sigma_K
+% 		\delta K_\alpha.
+% 	% \right).
+% \end{align}
+% \begin{align}
+% 	\nonumber
+% 	0
+% 	&=
+% 	% \left(
+% 		g
+% 			-
+% 			\left(
+% 			\frac{\sigma_c \sigma_e}{M}
+% 			\sum_{\alpha,\beta=1}^M
+% 			% \sum_{\beta=1}^{M}
+% 			\chi_{\alpha\beta}^{(R)}
+% 			d_{0\alpha} 
+% 			\left(
+% 				\rho d_{0\beta}
+% 				+
+% 				\sqrt{1-\rho^2} x_{0\beta}
+% 			\right)
+% 			% \overline N_0
+% 			% \right.
+% 			% \nonumber
+% 			% \\
+% 			% &\qquad\qquad
+% 			% \left.
+% 			+
+% 			\frac{\sigma_c^2}{M}
+% 			% \frac{\sigma_c}{\sqrt{M}}
+% 			\sum_{\alpha=1}^M
+% 			\sum_{j=1}^S
+% 			\nu_{\alpha j}^{(R)}
+% 			d_{0\alpha} 
+% 			d_{j0}
+% 			\right)
+% 			(\overline N_0 + \varepsilon \eta_0^{(N)})
+% 			\\
+% 			&\qquad
+% 		% \right]
+% 				+
+% 			\frac{\sigma_c }{\sqrt{M}}
+% 			\sum_{\alpha=1}^M
+% 			d_{0\alpha} 
+% 			(\overline R_{\alpha \setminus 0} + \varepsilon \eta_\alpha^{(R)})
+% 		+
+% 		\frac{\sigma_c}{\sqrt{M}}
+% 		d_{00}
+% 		\overline (R_0^+ + \varepsilon\eta_0^{(R)})
+% 		-
+% 		\sigma_m 
+% 		\delta m_0
+% 	% \right)
+% 	% .
+% \end{align}
+% Differentiating with respect to $\varepsilon$ gives,
+
+% \begin{align}
+% 	0
+% 	&=
+% 	% \overline R_0
+% 	% \left(
+% 		% \kappa
+% 		% +
+% 		\left(
+% 		\frac{\sigma_e\sigma_c}{M}
+% 		\sum_{i,j=1}^{S}
+% 		\nu_{i j}^{(N)}
+% 		\left(
+% 			\rho d_{i0}
+% 			+
+% 			\sqrt{1-\rho^2}x_{i0}
+% 		\right)
+% 		d_{j0}-1\right)
+% 		\left(
+% 			\frac{d\overline R_0 }{d\varepsilon}
+% 			+
+% 			\eta_0^{(R)}
+% 		\right)
+% 	% \right.
+% 	\nonumber
+% 	\\
+% 	&\qquad
+% 	% \left.
+% 		+
+% 		\left(
+% 		\frac{\sigma_e^2}{M}
+% 		\sum_{i=1}^{S}
+% 		\sum_{\beta = 1}^M
+% 		\chi_{i\beta}^{(N)}
+% 		\left(
+% 			\rho d_{i0}
+% 			+
+% 			\sqrt{1-\rho^2}x_{i0}
+% 		\right)
+% 		\left(
+% 			\rho d_{0\beta} + \sqrt{1-\rho^2} x_{0\beta}
+% 		\right)
+% 		% \overline N_0
+% 		-
+% 		\frac{\sigma_e}{\sqrt{M}}
+% 		\left(
+% 			\rho d_{00}
+% 			+
+% 			\sqrt{1-\rho^2}x_{00}
+% 		\right)
+% 		\right)
+% 		\left(\overline N_0^+ + \varepsilon \eta_i^{(N)}\right)
+% 	% \right.
+% 	\nonumber
+% 		\\
+% 		&\qquad
+% 	% \left.
+% 		% +
+% 		% \frac{\sigma_e\sigma_c}{M}
+% 		% \sum_{i,j=1}^{S}
+% 		% \nu_{i j}^{(N)}
+% 		% \left(
+% 		% 	\rho d_{i0}
+% 		% 	+
+% 		% 	\sqrt{1-\rho^2}x_{i0}
+% 		% \right)
+% 		% d_{j0}
+% 		% \overline R_0
+% 		-
+% 		\frac{\sigma_e}{\sqrt{M}}
+% 		\sum_{i=1}^{S}
+% 		\left(
+% 			\rho d_{i0}
+% 			+
+% 			\sqrt{1-\rho^2}x_{i0}
+% 		\right)
+% 		(\overline N_{i\setminus 0} + \varepsilon \eta_{i}^{(N)})
+% 		+
+% 		\sigma_K
+% 		\delta K_\alpha.
+% 	% \right).
+% \end{align}
+
+
+
+
+
+
+% % \begin{align}
+% % 	\overline N_0^+
+% % 	&=
+% % 	% \frac{1}{\sigma_c \sigma_e \rho \chi}
+% % 	-
+% % 	\frac{\phi_N}{\nu}
+% % 	\left(
+% % 		\frac{\sigma_c}{\sqrt{M}}
+% % 		\sum_{\alpha, \overline R_{\alpha \setminus 0} > 0} d_{0\alpha} \overline R_{\alpha \setminus 0}
+% % 		-
+% % 		\sigma_m \delta m_0
+% % 	\right),
+% % 	\\
+% % 	\overline R_0^+
+% % 	&=
+% % 	\frac{\phi_R}{\chi}
+% % 	% \frac{1}{1-\rho\sigma_e\sigma_c\gamma^{-1}\nu}
+% % 	\left(
+% % 		\kappa
+% % 		-
+% % 		\frac{\sigma_e}{\sqrt{M}}
+% % 		\sum_{i,\overline{N}_{i \setminus 0} > 0}
+% % 		\overline N_{i\setminus 0}
+% % 		\left(
+% % 			\rho d_{i0} + \sqrt{1-\rho^2}x_{i0}
+% % 		\right)
+% % 		+
+% % 		\sigma_K \delta K_0
+% % 	\right).
+% % \end{align}
+% % Applying the perturbation gives,
+% % \begin{align}
+% % 	\overline N_0^+
+% % 	&=
+% % 	% \frac{1}{\sigma_c \sigma_e \rho \chi}
+% % 	-
+% % 	\frac{\phi_N}{\nu}
+% % 	\left(
+% % 		\frac{\sigma_c}{\sqrt{M}}
+% % 		\sum_{\alpha, \overline R_{\alpha \setminus 0} > 0} d_{0\alpha} (\overline R_{\alpha \setminus 0} + \varepsilon\eta_\alpha^{(R)})
+% % 		-
+% % 		\sigma_m \delta m_0
+% % 	\right)
+% % 	\nonumber
+% % 	\\
+% % 	&=
+% % 	-
+% % 	\frac{\phi_N}{\nu}
+% % 	\left(
+% % 		\frac{\sigma_c}{\sqrt{M}}
+% % 		\sum_{\alpha, \overline R_{\alpha \setminus 0} > 0} d_{0\alpha} (\overline R_{\alpha \setminus 0} + \varepsilon\eta_\alpha^{(R)})
+% % 		-
+% % 		\sigma_m \delta m_0
+% % 	\right)
+% % \end{align}
+% % \begin{align}
+% % 	\overline R_0^+
+% % 	&=
+% % 	\frac{\phi_R}{\chi}
+% % 	% \frac{1}{1-\rho\sigma_e\sigma_c\gamma^{-1}\nu}
+% % 	\left(
+% % 		\kappa
+% % 		-
+% % 		\frac{\sigma_e}{\sqrt{M}}
+% % 		\sum_{i,\overline{N}_{i \setminus 0} > 0}
+% % 		(\overline N_{i\setminus 0} + \varepsilon \eta_i^{(N)})
+% % 		\left(
+% % 			\rho d_{i0} + \sqrt{1-\rho^2}x_{i0}
+% % 		\right)
+% % 		+
+% % 		\sigma_K \delta K_0
+% % 	\right),
+% % \end{align}
+% % and differentiating with respect to $\varepsilon$ yields,
+% % \begin{align}
+% % 	\overline N_0^+
+% % 	&=
+% % 	% \frac{1}{\sigma_c \sigma_e \rho \chi}
+% % 	-
+% % 	\frac{\phi_N}{\nu}
+% % 	\left(
+% % 		\frac{\sigma_c}{\sqrt{M}}
+% % 		\sum_{\alpha, \overline R_{\alpha \setminus 0} > 0} d_{0\alpha} (\overline R_{\alpha \setminus 0} + \varepsilon\eta_\alpha^{(R)})
+% % 		-
+% % 		\sigma_m \delta m_0
+% % 	\right),
+% % 	\\
+% % 	\overline R_0^+
+% % 	&=
+% % 	\frac{\phi_R}{\chi}
+% % 	% \frac{1}{1-\rho\sigma_e\sigma_c\gamma^{-1}\nu}
+% % 	\left(
+% % 		\kappa
+% % 		-
+% % 		\frac{\sigma_e}{\sqrt{M}}
+% % 		\sum_{i,\overline{N}_{i \setminus 0} > 0}
+% % 		(\overline N_{i\setminus 0} + \varepsilon \eta_i^{(N)})
+% % 		\left(
+% % 			\rho d_{i0} + \sqrt{1-\rho^2}x_{i0}
+% % 		\right)
+% % 		+
+% % 		\sigma_K \delta K_0
+% % 	\right),
+% % \end{align}
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
+
+
+
+
+
+

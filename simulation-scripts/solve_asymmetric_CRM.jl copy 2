@@ -1,0 +1,78 @@
+#julia --threads nThreads
+@time begin
+nThreads = Threads.nthreads()
+@info string(nThreads) * " threads available" 
+import Pkg;
+Pkg.add(["DifferentialEquations", "JLD2"])
+@info "Packages installed"
+using DifferentialEquations, JLD2
+@info "Precompilation complete"
+end
+
+struct CRMParams
+    c::Matrix{Float64}
+    e::Matrix{Float64}
+    K::Vector{Float64}
+    m::Vector{Float64}
+    S::Int64
+    M::Int64
+    CRMParams(c,e,K,m) = size(c,1)==size(m,1) && size(c,2)==size(K,1) && size(c) == size(e) ? new(c,e,K,m,size(m)[1],size(K)[1]) : error("parameters wrong dimensions")
+end
+
+function CRM!(du,u,p,t)
+    λ = @view u[1:p.S]
+    dλ = @view du[1:p.S]
+    R = @view u[end+1-p.M:end]
+    dR = @view du[end+1-p.M:end]
+    dλ .= λ .* (p.c * R .- p.m)
+    dR .= R .* (p.K .- R .-  p.e' * λ)
+end
+
+M = 50;
+# M = 300;
+S = 50;
+# S = 300;
+μc = 1e0M;
+μe = 1e0M;
+σc = 2e-1sqrt(M);
+σe = 2e-1sqrt(M);
+K = 1e0;
+σK = 1e-1;
+m = 1e0;
+σm = 1e-1;
+
+@info "M = "*string(M)
+@info "S = "*string(S)
+@info "μc = "*string(μc/M)*"M"
+@info "μe = "*string(μe/M)*"M"
+@info "σc = "*string(σc/sqrt(M))*"√M"
+@info "σe = "*string(σe/sqrt(M))*"√M"
+@info "K = "*string(K)
+@info "σK = "*string(σK)
+@info "m = "*string(m)
+@info "σm = "*string(σm)
+
+function runCRM(ρ)
+    K0 = K .+ σK*randn(M);
+    params = randn(S,M) |> d -> CRMParams(μc/M .+ (σc/sqrt(M)).*d,μe/M .+ (σe/sqrt(M)).*(ρ.*d .+ sqrt(1-ρ^2).*randn(S,M)),K0,m .+ σm*randn(S))
+    u0=vcat(1e-1ones(S)/S,K0)
+    tspan=(0.0,1000.0);
+    prob = ODEProblem(CRM!,u0,tspan,params);
+    sol = solve(prob,abstol=1e-7,reltol=1e-7,saveat=4);
+    # sol = solve(prob,abstol=1e-15,reltol=1e-15,saveat=4);
+    return sol
+end
+
+ρs = 0.0:0.5:1.0
+# ρs = 0.0:0.01:1.0
+
+@time Threads.@threads for _ in 1:nThreads
+    @info "Thread "*string(Threads.threadid())*" started"
+    @time for ρ in ρs
+        # GC.gc()
+        for i in 1:20
+            jldsave("./experiment3-solution_ending_derivatives_thread="*string(Threads.threadid())*"_rho="*string(ρ)*"_"*string(i)*".jld2";data=runCRM(ρ)(800:2:1000,Val{1}).u);
+        end
+    end
+    @info "Thread "*string(Threads.threadid())*" finished"
+end

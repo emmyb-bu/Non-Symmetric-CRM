@@ -1,0 +1,69 @@
+#julia --threads nThreads
+@time begin
+nThreads = Threads.nthreads()
+@info string(nThreads) * " threads available" 
+using DifferentialEquations, JLD2
+theme(:dao)
+@info "Precompilation complete"
+end
+
+struct CRMParams
+    c::Matrix{Float64}
+    e::Matrix{Float64}
+    K::Vector{Float64}
+    m::Vector{Float64}
+    S::Int64
+    M::Int64
+    CRMParams(c,e,K,m) = size(c,1)==size(m,1) && size(c,2)==size(K,1) && size(c) == size(e) ? new(c,e,K,m,size(m)[1],size(K)[1]) : error("parameters wrong dimensions")
+end
+
+function CRM!(du,u,p,t)
+    λ = @view u[1:p.S]
+    dλ = @view du[1:p.S]
+    R = @view u[end+1-p.M:end]
+    dR = @view du[end+1-p.M:end]
+    dλ .= λ .* (p.c * R .- p.m)
+    dR .= R .* (p.K .- R .-  p.e' * λ)
+end
+
+M = 200;
+S = 200;
+μc = 1e0M;
+μe = 1e0M;
+σc = 2e-1sqrt(M);
+σe = 2e-1sqrt(M);
+K = 1e0;
+σK = 1e-1;
+m = 1e0;
+σm = 1e-1;
+
+@info "M = "*string(M)
+@info "S = "*string(S)
+@info "μc = "*string(μc/M)*"M"
+@info "μe = "*string(μe/M)*"M"
+@info "σc = "*string(σc/sqrt(M))*"√M"
+@info "σe = "*string(σe/sqrt(M))*"√M"
+@info "K = "*string(K)
+@info "σK = "*string(σK)
+@info "m = "*string(m)
+@info "σm = "*string(σm)
+
+function runCRM(ρ)
+    K0 = K .+ σK*randn(M);
+    params = randn(M,S) |> d -> CRMParams(μc/M .+ (σc/sqrt(M)).*d,μe/M .+ (σe/sqrt(M)).*(ρ.*d .+ sqrt(1-ρ^2).*randn(M,S)),K0,m .+ σm*randn(S))
+    u0=vcat(1e-1ones(S)/S,K0)
+    tspan=(0.0,2400.0);
+    prob = ODEProblem(CRM!,u0,tspan,params);
+    sol = solve(prob,abstol=1e-14,reltol=1e-14,saveat=4);
+    return sol
+end
+
+ρs = 0.0:0.025:1.0
+
+@time Threads.@threads for _ in 1:nThreads
+    @time for ρ in ρs
+        GC.gc()
+        sols=[runCRM(ρ) for _ in 1:2];
+        jldsave("solution_thread"*string(Threads.threadid())*"_rho="*string(ρ)*".jld2";dat=(X -> X(2000:2:2400,Val{1}).u).(sols));
+    end
+end
