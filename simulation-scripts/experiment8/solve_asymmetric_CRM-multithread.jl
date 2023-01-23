@@ -56,29 +56,26 @@ function runCRM(ρ,tmax)
     u0=vcat(ones(S)/S,K0)
     tspan=(0.0,tmax + 0.25);
     prob = ODEProblem(CRM!,u0,tspan,params);
-    sol = solve(prob,abstol=1e-15,reltol=1e-15,saveat=(tmax-0.25):0.05:tmax+0.25);
-    return sol
-end
-
-tmax = 5000;
-ρs = 0.0:0.01:1.0
-
-Threads.@threads for _ in 1:nThreads
-    for ρ in ρs
-        sols = [runCRM(ρ,tmax) _ in 1:10];
-        jldsave("./results/results_experiment6/experiment6-solution_ending_derivatives_thread="*string(Threads.threadid())*".jld2";data = (X -> X(tmax,Val{1})).(sols));
-        jldsave("./results/results_experiment6/experiment6-solution_ending_thread="*string(Threads.threadid())*".jld2";data = (X -> X(tmax)).(sols));
+    sol = solve(prob,Tsit5(),maxiters=Int64(5e7),abstol=1e-16,reltol=1e-16,saveat=(tmax-0.25):0.05:tmax+0.25);
+    if sol.retcode != :Success
+        println("Failure at ρ = "*string(ρ)*", thread "*string(Threads.threadid())*". Re-running...");
+        sol = runCRM(ρ,tmax);
+        # warning! bad statistical properties! can be avoided by using small tolerances...
+    else
+        return sol
     end
 end
 
-# @time Threads.@threads for _ in 1:nThreads
-#     @info "Thread "*string(Threads.threadid())*" started"
-#     @time for ρ in ρs
-#         # GC.gc()
-#         for i in 1:12
-#             jldsave("./results/results_experiment5/experiment5-solution_ending_derivatives_thread="*string(Threads.threadid())*"_rho="*string(ρ)*"_"*string(i)*".jld2";data=runCRM(ρ)(2000:2:2400,Val{1}).u);
-#             jldsave("./results/results_experiment5/experiment5-solution_ending_thread="*string(Threads.threadid())*"_rho="*string(ρ)*"_"*string(i)*".jld2";data=runCRM(ρ)(2000:2:2400).u);
-#         end
-#     end
-#     @info "Thread "*string(Threads.threadid())*" finished"
-# end
+tmax = 9000;
+
+ρs = 0.0:0.025:1.0
+
+experiment_no = "8";
+
+Threads.@threads for _ in 1:nThreads
+    for ρ in ρs
+        sols = [runCRM(ρ,tmax) for _ in 1:10];
+        jldsave("./results/results_experiment"*experiment_no*"/experiment"*experiment_no*"-solution_ending_derivatives_thread="*string(Threads.threadid())*"_rho="*string(ρ)*".jld2";data = (X -> X(tmax,Val{1})).(sols));
+        jldsave("./results/results_experiment"*experiment_no*"/experiment"*experiment_no*"-solution_ending_thread="*string(Threads.threadid())*"_rho="*string(ρ)*".jld2";data = (X -> X(tmax)).(sols));
+    end
+end
